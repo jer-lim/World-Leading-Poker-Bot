@@ -1,0 +1,5 @@
+*.pyc
+__pycache__
+.idea/
+.idea/misc.xml
+.idea/workspace.xml
