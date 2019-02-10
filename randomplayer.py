@@ -17,12 +17,16 @@ class RandomPlayer(BasePokerPlayer):
     r = rand.random()
     if r <= 0.5:
       call_action_info = valid_actions[1]
-    elif r<= 0.9 and len(valid_actions ) == 3:
-      call_action_info = valid_actions[2]
+      action, amount = call_action_info["action"], call_action_info["amount"]
+    elif r<= 0.9 and valid_actions[2]["amount"]["min"] > -1:
+      raise_action_info = valid_actions[2]
+      amount = rand.randrange(raise_action_info["amount"]["min"], raise_action_info["amount"]["max"], 1)
+      action = raise_action_info["action"]
     else:
-      call_action_info = valid_actions[0]
-    action = call_action_info["action"]
-    return action  # action returned here is sent to the poker engine
+      fold_action_info = valid_actions[0]
+      action = fold_action_info["action"]
+      amount = 0
+    return action, amount  # action returned here is sent to the poker engine
 
   def receive_game_start_message(self, game_info):
     pass
