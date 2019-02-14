@@ -15,11 +15,12 @@ class BootStrapBot(BasePokerPlayer):
     self.total_rounds = 0
 
     self.backend = Dementor(self)
+    self.backend.prepare_to_start()
     self.backendThread = Process(target = self.backend.start_backend)
     self.backendThread.start()
 
   def declare_action(self, valid_actions, hole_card, round_state):
-    self.backend.declare_action(valid_actions, hole_card, round_state)
+    # self.backend.declare_action(valid_actions, hole_card, round_state)
     score = self.hand_scorer.score_hole_cards(hole_card)
 
     if (score >= 0):
@@ -30,7 +31,6 @@ class BootStrapBot(BasePokerPlayer):
 
   def receive_game_start_message(self, game_info):
     self.seatNum = self.__find_position(game_info)
-    self.max_rounds = game_info["rule"]["max_round"]
     self.backend.receive_game_start_message(game_info)
 
   def receive_round_start_message(self, round_count, hole_card, seats):
@@ -43,25 +43,7 @@ class BootStrapBot(BasePokerPlayer):
     self.backend.receive_game_update_message(action, round_state)
 
   def receive_round_result_message(self, winners, hand_info, round_state):
-    self.total_rounds += 1
-    self.__check_game_over(round_state)
     self.backend.receive_round_result_message(winners, hand_info, round_state)
-
-  # Check if the game is over so we can terminate the backend
-  def __check_game_over(self, round_state):
-    game_over = False
-    if self.total_rounds == self.max_rounds:
-      game_over = True
-    else:
-      for seat in round_state["seats"]:
-        if seat["stack"] == 0:
-          game_over = True
-          break
-
-    if game_over:
-      print(str(self.total_rounds))
-      self.backendThread.terminate()
-
 
   def __raise_or_call(self, valid_actions):
     if {"action": "raise"} in valid_actions:
@@ -88,19 +70,27 @@ class BootStrapBot(BasePokerPlayer):
 class Dementor(object):
   def __init__(self, frontend):
     self.frontend = frontend
+    self.processQueue = None
+    self.resultQueue = None
+
+  def prepare_to_start(self):
     self.processQueue = Queue()
     self.resultQueue = Queue()
+    print("Ready to start")
 
   def start_backend(self):
     print("Dementor started")
     while 1:
       # Wait for work to be assigned
-      work = self.processQueue.get(True, 1)
-      # print(work)
+      try:
+        # Quit when all games are over
+        work = self.processQueue.get(True, 0.5)
+      except:
+        break
 
   def declare_action(self, valid_actions, hole_card, round_state):
     self.processQueue.put((1, valid_actions, hole_card, round_state))
-    # return self.resultQueue.get()
+    return self.resultQueue.get()
 
   def receive_game_start_message(self, game_info):
     self.seatNum = self.__find_position(game_info)
