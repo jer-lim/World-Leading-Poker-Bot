@@ -1,6 +1,7 @@
 from pypokerengine.players import BasePokerPlayer
 import pprint
 import collections
+from multiprocessing import Process, Queue
 
 PreflopOdds = collections.namedtuple('PreflopOdds', 'ev win tie occur cumulative')
 
@@ -10,8 +11,15 @@ class BootStrapBot(BasePokerPlayer):
     self.hand_scorer = HandScorer()
     self.seatNum = 0
 
+    self.max_rounds = 0
+    self.total_rounds = 0
+
+    self.backend = Dementor(self)
+    self.backendThread = Process(target = self.backend.start_backend)
+    self.backendThread.start()
+
   def declare_action(self, valid_actions, hole_card, round_state):
-    pp = pprint.PrettyPrinter(indent=2)
+    self.backend.declare_action(valid_actions, hole_card, round_state)
     score = self.hand_scorer.score_hole_cards(hole_card)
 
     if (score >= 0):
@@ -19,6 +27,80 @@ class BootStrapBot(BasePokerPlayer):
     else:
       return "fold"
     
+
+  def receive_game_start_message(self, game_info):
+    self.seatNum = self.__find_position(game_info)
+    self.max_rounds = game_info["rule"]["max_round"]
+    self.backend.receive_game_start_message(game_info)
+
+  def receive_round_start_message(self, round_count, hole_card, seats):
+    self.backend.receive_round_start_message(round_count, hole_card, seats)
+
+  def receive_street_start_message(self, street, round_state):
+    self.backend.receive_street_start_message(street, round_state)
+
+  def receive_game_update_message(self, action, round_state):
+    self.backend.receive_game_update_message(action, round_state)
+
+  def receive_round_result_message(self, winners, hand_info, round_state):
+    self.total_rounds += 1
+    self.__check_game_over(round_state)
+    self.backend.receive_round_result_message(winners, hand_info, round_state)
+
+  # Check if the game is over so we can terminate the backend
+  def __check_game_over(self, round_state):
+    game_over = False
+    if self.total_rounds == self.max_rounds:
+      game_over = True
+    else:
+      for seat in round_state["seats"]:
+        if seat["stack"] == 0:
+          game_over = True
+          break
+
+    if game_over:
+      print(str(self.total_rounds))
+      self.backendThread.terminate()
+
+
+  def __raise_or_call(self, valid_actions):
+    if {"action": "raise"} in valid_actions:
+      return "raise"
+    else:
+      return "call"
+
+  def __find_position(self, game_info):
+    seatNum = 0
+    for seat in game_info['seats']:
+      if seat['uuid'] != self.uuid:
+        seatNum += 1
+      else:
+        break
+    return seatNum
+
+  def __is_big_blind(self, round_state):
+    if (round_state["big_blind_pos"] == self.seatNum):
+      return True
+    else:
+      return False
+
+# Backend of the bot and where the real work is done
+class Dementor(object):
+  def __init__(self, frontend):
+    self.frontend = frontend
+    self.processQueue = Queue()
+    self.resultQueue = Queue()
+
+  def start_backend(self):
+    print("Dementor started")
+    while 1:
+      # Wait for work to be assigned
+      work = self.processQueue.get(True, 1)
+      # print(work)
+
+  def declare_action(self, valid_actions, hole_card, round_state):
+    self.processQueue.put((1, valid_actions, hole_card, round_state))
+    # return self.resultQueue.get()
 
   def receive_game_start_message(self, game_info):
     self.seatNum = self.__find_position(game_info)
@@ -44,7 +126,7 @@ class BootStrapBot(BasePokerPlayer):
   def __find_position(self, game_info):
     seatNum = 0
     for seat in game_info['seats']:
-      if seat['uuid'] != self.uuid:
+      if seat['uuid'] != self.frontend.uuid:
         seatNum += 1
       else:
         break
@@ -56,6 +138,7 @@ class BootStrapBot(BasePokerPlayer):
     else:
       return False
 
+# Assign a score to a hand
 class HandScorer(object):
 
   def score_hole_cards(self, hole_cards):
@@ -68,6 +151,7 @@ class HandScorer(object):
     # return
     return score
 
+# Help manage our cards better
 class HoleCards(object):
   __slots__ = ('rank1', 'rank2', 'suited')
   def __init__(self, rank1, rank2, suited):
