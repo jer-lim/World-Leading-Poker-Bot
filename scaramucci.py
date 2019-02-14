@@ -8,30 +8,16 @@ PreflopOdds = collections.namedtuple('PreflopOdds', 'ev win tie occur cumulative
 class BootStrapBot(BasePokerPlayer):
 
   def __init__(self):
-    self.hand_scorer = HandScorer()
-    self.seatNum = 0
-
-    self.max_rounds = 0
-    self.total_rounds = 0
-
     self.backend = Dementor(self)
     self.backend.prepare_to_start()
     self.backendThread = Process(target = self.backend.start_backend)
     self.backendThread.start()
 
   def declare_action(self, valid_actions, hole_card, round_state):
-    # self.backend.declare_action(valid_actions, hole_card, round_state)
-    score = self.hand_scorer.score_hole_cards(hole_card)
-
-    if (score >= 0):
-      return self.__raise_or_call(valid_actions)
-    else:
-      return "fold"
-    
+    return self.backend.declare_action(valid_actions, hole_card, round_state)
 
   def receive_game_start_message(self, game_info):
-    self.seatNum = self.__find_position(game_info)
-    self.backend.receive_game_start_message(game_info)
+    self.backend.receive_game_start_message(game_info, self.uuid)
 
   def receive_round_start_message(self, round_count, hole_card, seats):
     self.backend.receive_round_start_message(round_count, hole_card, seats)
@@ -45,30 +31,10 @@ class BootStrapBot(BasePokerPlayer):
   def receive_round_result_message(self, winners, hand_info, round_state):
     self.backend.receive_round_result_message(winners, hand_info, round_state)
 
-  def __raise_or_call(self, valid_actions):
-    if {"action": "raise"} in valid_actions:
-      return "raise"
-    else:
-      return "call"
-
-  def __find_position(self, game_info):
-    seatNum = 0
-    for seat in game_info['seats']:
-      if seat['uuid'] != self.uuid:
-        seatNum += 1
-      else:
-        break
-    return seatNum
-
-  def __is_big_blind(self, round_state):
-    if (round_state["big_blind_pos"] == self.seatNum):
-      return True
-    else:
-      return False
-
 # Backend of the bot and where the real work is done
 class Dementor(object):
   def __init__(self, frontend):
+    self.hand_scorer = HandScorer()
     self.frontend = frontend
     self.processQueue = None
     self.resultQueue = None
@@ -76,10 +42,10 @@ class Dementor(object):
   def prepare_to_start(self):
     self.processQueue = Queue()
     self.resultQueue = Queue()
-    print("Ready to start")
+    #print("Ready to start")
 
   def start_backend(self):
-    print("Dementor started")
+    #print("Dementor started")
     while 1:
       # Wait for work to be assigned
       try:
@@ -88,12 +54,30 @@ class Dementor(object):
       except:
         break
 
+      if work[0] == 1:
+        action = self.get_action(work[1], work[2], work[3])
+        self.resultQueue.put(action)
+      elif work[0] == 2:
+        self.uuid = work[2]
+        self.do_game_start_message(work[1])
+
+  def get_action(self, valid_actions, hole_card, round_state):
+    score = self.hand_scorer.score_hole_cards(hole_card)
+
+    if (score >= 0):
+      return self.__raise_or_call(valid_actions)
+    else:
+      return "fold"
+
+  def do_game_start_message(self, game_info):
+    self.seatNum = self.__find_position(game_info)
+
   def declare_action(self, valid_actions, hole_card, round_state):
     self.processQueue.put((1, valid_actions, hole_card, round_state))
     return self.resultQueue.get()
 
-  def receive_game_start_message(self, game_info):
-    self.seatNum = self.__find_position(game_info)
+  def receive_game_start_message(self, game_info, uuid):
+    self.processQueue.put((2, game_info, uuid))
 
   def receive_round_start_message(self, round_count, hole_card, seats):
     pass
@@ -116,7 +100,7 @@ class Dementor(object):
   def __find_position(self, game_info):
     seatNum = 0
     for seat in game_info['seats']:
-      if seat['uuid'] != self.frontend.uuid:
+      if seat['uuid'] != self.uuid:
         seatNum += 1
       else:
         break
