@@ -1,6 +1,60 @@
+from pypokerengine.players import BasePokerPlayer
+import pprint
 import collections
 
 PreflopOdds = collections.namedtuple('PreflopOdds', 'ev win tie occur cumulative')
+
+class BootStrapBot(BasePokerPlayer):
+
+  def __init__(self):
+    self.hand_scorer = HandScorer()
+    self.seatNum = 0
+
+  def declare_action(self, valid_actions, hole_card, round_state):
+    pp = pprint.PrettyPrinter(indent=2)
+    score = self.hand_scorer.score_hole_cards(hole_card)
+
+    if (score >= 0):
+      return self.__raise_or_call(valid_actions)
+    else:
+      return "fold"
+    
+
+  def receive_game_start_message(self, game_info):
+    self.seatNum = self.__find_position(game_info)
+
+  def receive_round_start_message(self, round_count, hole_card, seats):
+    pass
+
+  def receive_street_start_message(self, street, round_state):
+    pass
+
+  def receive_game_update_message(self, action, round_state):
+    pass
+
+  def receive_round_result_message(self, winners, hand_info, round_state):
+    pass
+
+  def __raise_or_call(self, valid_actions):
+    if {"action": "raise"} in valid_actions:
+      return "raise"
+    else:
+      return "call"
+
+  def __find_position(self, game_info):
+    seatNum = 0
+    for seat in game_info['seats']:
+      if seat['uuid'] != self.uuid:
+        seatNum += 1
+      else:
+        break
+    return seatNum
+
+  def __is_big_blind(self, round_state):
+    if (round_state["big_blind_pos"] == self.seatNum):
+      return True
+    else:
+      return False
 
 class HandScorer(object):
 
@@ -266,3 +320,6 @@ HoleCards.from_str('62o') : PreflopOdds(-0.31, 31.07, 5.99, 0.90, 98.19),
 HoleCards.from_str('42o') : PreflopOdds(-0.33, 30.11, 6.16, 0.90, 99.09),
 HoleCards.from_str('32o') : PreflopOdds(-0.35, 29.23, 6.12, 0.90, 100.00)
 }
+
+def setup_ai():
+  return BootStrapBot()
