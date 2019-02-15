@@ -73,3 +73,10 @@ In the limited version, user only allowed to raise for four time in one round ga
 In addition, in each street (preflop,flop,turn,river),each player only allowed to raise for four times.
 
 Other information is similar to the PyPokerEngine,please check the detail about the parameter [link](https://github.com/ishikota/PyPokerEngine/blob/master/AI_CALLBACK_FORMAT.md)
+
+#### Additional notes for coding player
+1. receive_game_start_message is called at the start of the game before preflop, contains details about users, rounds, etc.
+2. receive_round_start_message is called before start of round, contains information about `face down cards`.
+3. receive_street_start_message is called before each street with current details about game state. i.e. street = flop, turn or river
+4. receive_game_start_message is called after *every* move
+5. receive_round_result_message called after every end of round i.e. win/lose
