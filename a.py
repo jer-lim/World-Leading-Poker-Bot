@@ -1,8 +1,8 @@
 from pypokerengine.players import BasePokerPlayer
 from pypokerengine.utils.card_utils import gen_cards, estimate_hole_card_win_rate
 from pypokerengine.engine.hand_evaluator import HandEvaluator
-hole_card = gen_cards(['H7', 'S7'])
-community_card = gen_cards(['D2', 'HQ', 'C7'])
+hole_card = gen_cards(['H7', 'D3'])
+community_card = gen_cards(['D2', 'HQ', 'C7', 'C8', 'C9'])
 import timeit
 """
 func = lambda : estimate_hole_card_win_rate(
@@ -17,6 +17,6 @@ print(func())
 
 """
 from adversarial_search import AdversarialSeach
-tries = 100
+tries = 1
 
-print(timeit.timeit(lambda:AdversarialSeach(hole_card, community_card, 0).decide(["raise", "fold", "call"]), number=tries)/tries)
+print(timeit.timeit(lambda:AdversarialSeach(hole_card, community_card, 40).decide(["raise", "fold", "call"]), number=tries)/tries)
