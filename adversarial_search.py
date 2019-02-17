@@ -15,14 +15,17 @@ Attempt to maximise utility given current set of hole cards/community cards
 Terminates after the last community card is drawn
 
 #TODO:
-Work on ChanceNode
-It currently returns ONE decision node, using a random card
-
+1) ChanceNode currently returns ONE decision node, using a random card
+Try creating a new random function that returns a possible value in a whole category
+2) Refactor out random generation of opponent's hole cards so that it is only done once.
+3) (*) Rethink final decision node evaluation metric when turn ends
 """
 
 indent = 0
 def indent_print(x):
     print("   " * indent + str(x))
+
+
 from pypokerengine.utils.card_utils import gen_cards, estimate_hole_card_win_rate, _pick_unused_card
 
 RAISE_TURN_THRESHOLD = 2
@@ -43,6 +46,7 @@ class DecisionNode:
         Params
         ------
         turn: 0 for my turn, 1 for opponent's turn
+        hole_cards: my hole cards (random cards generated for opponent)
         raise_turn: current times in street that raise has been called
         called: True if call or raise has been called once by opponent
         """
@@ -62,8 +66,11 @@ class DecisionNode:
         results = {}
         for label, func in action_funcs:
             node = func()
+            print("TESTING ACTION: " + str(label))
             value = node.eval()
-            print(label, value)
+            print("DONE TESTING ACTION: " + str(label) + " VAL:" + str(value))
+            print("----------------------------------")
+
             if value != None:
                 results[label] = value
         indent_print(results)
@@ -79,6 +86,7 @@ class DecisionNode:
         indent_print("-MY TURN-"  if not (self.turn) else "-OPP TURN-")
         #Terminal node
         if self.remaining_cards == 0 and not self.called:
+            indent -= 1
             return self.expected_value()
 
         f = max if self.turn == 0 else min
@@ -97,7 +105,7 @@ class DecisionNode:
         return f(results)
 
     def expected_value(self):
-        cards = self.hole_cards if self.turn == 0 else _pick_unused_card(2, self.hole_cards + self.community_cards)
+        cards = self.hole_cards
         win_prob = estimate_hole_card_win_rate(
                 nb_simulation=10,
                 nb_player=2,
@@ -128,7 +136,7 @@ class DecisionNode:
             if self.remaining_cards == 0:
                 return EndingNode(self.expected_value())
             else:
-                return ChanceNode(self.hole_cards, self.community_cards, pot)
+                return ChanceNode(self.hole_cards, self.community_cards, self.pot)
         return DecisionNode(self.opponent, self.hole_cards, self.community_cards, self.pot, called=True)
 
 class EndingNode:
@@ -142,7 +150,7 @@ class FoldedNode:
         self.winner = winner
         self.pot = pot
     def eval(self):
-        indent_print("Opponent folded. Winner: " + str(self.winner))
+        indent_print("A player folded. Winner: " + str(self.winner))
         return (-1) *self.pot if self.winner else self.pot
 
 class ChanceNode:
