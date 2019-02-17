@@ -15,11 +15,12 @@ Attempt to maximise utility given current set of hole cards/community cards
 Terminates after the last community card is drawn
 
 #TODO:
-Work on chanceNode
+Work on ChanceNode
+It currently returns ONE decision node, using a random card
 """
 
 
-from pypokerengine.utils.card_utils import gen_cards, estimate_hole_card_win_rate
+from pypokerengine.utils.card_utils import gen_cards, estimate_hole_card_win_rate, _pick_unused_card
 
 
 class AdversarialSeach:
@@ -106,4 +107,6 @@ class ChanceNode:
         self.community_cards = community_cards
         self.pot = pot
     def eval(self):
-        node = DecisionNode(0, self.hole_cards, self.community_cards, self.pot)
+        new_card = _pick_unused_card(1, self.hole_cards + self.community_cards)
+        node = DecisionNode(0, self.hole_cards, self.community_cards + new_card, self.pot)
+        return node.eval()
