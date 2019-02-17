@@ -17,6 +17,7 @@ Terminates after the last community card is drawn
 #TODO:
 Work on ChanceNode
 It currently returns ONE decision node, using a random card
+
 """
 
 indent = 0
@@ -38,6 +39,13 @@ class AdversarialSeach:
 
 class DecisionNode:
     def __init__(self, turn, hole_cards, community_cards, pot, raise_turn = 0, called=False):
+        """
+        Params
+        ------
+        turn: 0 for my turn, 1 for opponent's turn
+        raise_turn: current times in street that raise has been called
+        called: True if call or raise has been called once by opponent
+        """
 
         self.hole_cards = hole_cards
         self.turn = turn
