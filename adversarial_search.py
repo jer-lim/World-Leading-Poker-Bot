@@ -22,7 +22,7 @@ It currently returns ONE decision node, using a random card
 
 from pypokerengine.utils.card_utils import gen_cards, estimate_hole_card_win_rate, _pick_unused_card
 
-RAISE_TURN_THRESHOLD = 5
+RAISE_TURN_THRESHOLD = 2
 
 class AdversarialSeach:
     def __init__(self, hole_cards, community_cards, pot):
@@ -42,7 +42,7 @@ class DecisionNode:
         self.community_cards = community_cards
         self.remainding_cards = 5 - len(community_cards)
         self.pot = pot
-        self.raise_turn = self.raise_turn
+        self.raise_turn = raise_turn
 
     def getBestAction(self):
         actions = [self.raise_stakes, self.fold, self.see]
@@ -50,7 +50,8 @@ class DecisionNode:
         for action in actions:
             node = action()
             value = node.eval()
-            results[action] = value
+            if value != None:
+                results[action] = value
         return max(results.items(), results.get)
 
     """
@@ -58,8 +59,7 @@ class DecisionNode:
     """
     def eval(self):
         #Terminal node
-        if self.remainding_cards == 0:
-
+        if self.remainding_cards <= 0:
             return self.expected_value()
 
         f = max if self.turn else min
@@ -69,8 +69,9 @@ class DecisionNode:
         results = []
         for action in actions:
             node = action()
-            value = node.eval()
-            results.append(value)
+            if node != None:
+                value = node.eval()
+                results.append(value)
         return f(results)
 
     def expected_value(self):
@@ -85,7 +86,7 @@ class DecisionNode:
     def raise_stakes(self):
         if self.raise_turn > RAISE_TURN_THRESHOLD:
             return None
-        return DecisionNode(self.opponent, self.hole_cards, self.community_cards, self.pot + 10)
+        return DecisionNode(self.opponent, self.hole_cards, self.community_cards, self.pot + 10, self.raise_turn + 1)
     """
     Generates a next node that describes terminated value
     """
@@ -95,7 +96,16 @@ class DecisionNode:
     Generates the next node, allows it to go to chance phase
     """
     def see(self):
+        if self.remainding_cards == 0:
+            return EndingNode(self.expected_value())
         return ChanceNode(self.hole_cards, self.community_cards, self.pot)
+        
+class EndingNode:
+    def __init__(self, val):
+        self.val = val
+    def eval(self):
+        return self.val
+
 
 class TerminalNode:
     def __init__(self, winner, pot):
