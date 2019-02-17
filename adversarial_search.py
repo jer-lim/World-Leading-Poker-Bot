@@ -93,3 +93,10 @@ class DecisionNode:
     def see(self):
         return ChanceNode(self.hole_cards, self.community_cards, self.pot)
 
+class TerminalNode:
+    def __init__(self, winner, pot):
+        self.winner = winner
+        self.pot = pot
+    def eval():
+        return (-1) * self.pot if self.winner else self.winner
+
