@@ -18,5 +18,16 @@ Terminates after the last community card is drawn
 Work on chanceNode
 """
 
+
+from pypokerengine.utils.card_utils import gen_cards, estimate_hole_card_win_rate
+
+
 class AdversarialSeach:
-    def __init__(self):
+    def __init__(self, hole_cards, community_cards, pot):
+        self.hole_cards = hole_cards
+        self.community_cards = community_cards
+
+    def decide(self):
+        node = DecisionNode(self.hole_cards, self.community_cards)
+        return node.getBestAction()
+
