@@ -55,6 +55,7 @@ class DecisionNode:
         for label, func in action_funcs:
             node = func()
             value = node.eval()
+            print(label, value)
             if value != None:
                 results[label] = value
         indent_print(results)
@@ -66,6 +67,8 @@ class DecisionNode:
     def eval(self):
         global indent
         indent += 1
+
+        indent_print("-MY TURN-"  if not (self.turn) else "-OPP TURN-")
         #Terminal node
         if self.remaining_cards == 0 and not self.called:
             return self.expected_value()
@@ -80,7 +83,8 @@ class DecisionNode:
             if node != None:
                 value = node.eval()
                 results.append(value)
-        indent_print(results)
+                indent_print(value)
+        indent_print("VALUE: " + str(f(results)))
         indent -= 1
         return f(results)
 
@@ -97,23 +101,22 @@ class DecisionNode:
     Generates next node with raised stakes
     """
     def raise_stakes(self):
-        indent_print("RAISED")
-        if self.raise_turn > RAISE_TURN_THRESHOLD:
+        if self.raise_turn >= RAISE_TURN_THRESHOLD:
             return None
+        indent_print(str(self.turn) + ": EXPLORE RAISED")
         return DecisionNode(self.opponent, self.hole_cards, self.community_cards, self.pot + 10, self.raise_turn + 1, called=True)
     """
     Generates a next node that describes terminated value
     """
     def fold(self):
-        indent_print("FOLDED")
+        indent_print(str(self.turn) + ": EXPLORE FOLDED")
         return FoldedNode(self.opponent, self.pot)
     """
     Generates the next node, allows it to go to chance phase
     """
     def call(self):
-        indent_print("CALL")
+        indent_print(str(self.turn) + ": EXPLORE CALL")
         if self.called:
-            indent_print(self.called)
             if self.remaining_cards == 0:
                 return EndingNode(self.expected_value())
             else:
@@ -122,23 +125,20 @@ class DecisionNode:
 
 class EndingNode:
     def __init__(self, val):
-
         self.val = val
     def eval(self):
         return self.val
 
 class FoldedNode:
     def __init__(self, winner, pot):
-
         self.winner = winner
         self.pot = pot
     def eval(self):
+        indent_print("Opponent folded. Winner: " + str(self.winner))
         return (-1) *self.pot if self.winner else self.pot
 
 class ChanceNode:
     def __init__(self, hole_cards, community_cards, pot):
-
-
         self.hole_cards = hole_cards
         self.community_cards = community_cards
         self.pot = pot
