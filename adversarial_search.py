@@ -30,9 +30,9 @@ class AdversarialSeach:
         self.community_cards = community_cards
         self.pot = pot
 
-    def decide(self):
+    def decide(self, actions):
         node = DecisionNode(0,self.hole_cards, self.community_cards, self.pot)
-        return node.getBestAction()
+        return node.getBestAction(actions)
 
 class DecisionNode:
     def __init__(self, turn, hole_cards, community_cards, pot, raise_turn = 0):
@@ -44,15 +44,17 @@ class DecisionNode:
         self.pot = pot
         self.raise_turn = raise_turn
 
-    def getBestAction(self):
-        actions = [self.raise_stakes, self.fold, self.see]
+    def getBestAction(self, actions):
+        action_map = {"raise": self.raise_stakes, "fold":self.fold, "call":self.see}
+        action_funcs = [(action,action_map.get(action)) for action in actions]
         results = {}
-        for action in actions:
-            node = action()
+        for label, func in action_funcs:
+            node = func()
             value = node.eval()
             if value != None:
-                results[action] = value
-        return max(results.items(), results.get)
+                results[label] = value
+        print(results)
+        return max(results, key=results.get)
 
     """
     Returns an expected utility value at the current node
@@ -99,7 +101,7 @@ class DecisionNode:
         if self.remainding_cards == 0:
             return EndingNode(self.expected_value())
         return ChanceNode(self.hole_cards, self.community_cards, self.pot)
-        
+
 class EndingNode:
     def __init__(self, val):
         self.val = val
