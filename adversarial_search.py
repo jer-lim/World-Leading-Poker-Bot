@@ -35,7 +35,7 @@ class AdversarialSeach:
         return node.getBestAction(actions)
 
 class DecisionNode:
-    def __init__(self, turn, hole_cards, community_cards, pot, raise_turn = 0):
+    def __init__(self, turn, hole_cards, community_cards, pot, raise_turn = 0, called=False):
         self.hole_cards = hole_cards
         self.turn = turn
         self.opponent = 1 - self.turn
@@ -43,6 +43,7 @@ class DecisionNode:
         self.remainding_cards = 5 - len(community_cards)
         self.pot = pot
         self.raise_turn = raise_turn
+        self.called = called
 
     def getBestAction(self, actions):
         action_map = {"raise": self.raise_stakes, "fold":self.fold, "call":self.call}
@@ -74,6 +75,7 @@ class DecisionNode:
             if node != None:
                 value = node.eval()
                 results.append(value)
+        print(results)
         return f(results)
 
     def expected_value(self):
@@ -90,7 +92,7 @@ class DecisionNode:
     def raise_stakes(self):
         if self.raise_turn > RAISE_TURN_THRESHOLD:
             return None
-        return DecisionNode(self.opponent, self.hole_cards, self.community_cards, self.pot + 10, self.raise_turn + 1)
+        return DecisionNode(self.opponent, self.hole_cards, self.community_cards, self.pot + 10, self.raise_turn + 1, called=True)
     """
     Generates a next node that describes terminated value
     """
@@ -100,9 +102,12 @@ class DecisionNode:
     Generates the next node, allows it to go to chance phase
     """
     def call(self):
-        if self.remainding_cards == 0:
-            return EndingNode(self.expected_value())
-        return ChanceNode(self.hole_cards, self.community_cards, self.pot)
+        if self.called:
+            if self.remaining_cards == 0:
+                return EndingNode(self.expected_value())
+            else:
+                return ChanceNode(self.hole_cards, self.community_cards, pot)
+        return DecisionNode(self.opponent, self.hole_cards, self.community_cards, self.pot, called=True)
 
 class EndingNode:
     def __init__(self, val):
@@ -110,13 +115,12 @@ class EndingNode:
     def eval(self):
         return self.val
 
-
 class FoldedNode:
     def __init__(self, winner, pot):
         self.winner = winner
         self.pot = pot
     def eval(self):
-        return (-1) * self.pot if self.winner else self.winner
+        return (-1) *self.pot if self.winner else self.pot
 
 class ChanceNode:
     def __init__(self, hole_cards, community_cards, pot):
