@@ -22,27 +22,29 @@ It currently returns ONE decision node, using a random card
 
 from pypokerengine.utils.card_utils import gen_cards, estimate_hole_card_win_rate, _pick_unused_card
 
+RAISE_TURN_THRESHOLD = 5
 
 class AdversarialSeach:
     def __init__(self, hole_cards, community_cards, pot):
         self.hole_cards = hole_cards
         self.community_cards = community_cards
+        self.pot = pot
 
     def decide(self):
-        node = DecisionNode(self.hole_cards, self.community_cards)
+        node = DecisionNode(0,self.hole_cards, self.community_cards, self.pot)
         return node.getBestAction()
 
 class DecisionNode:
-    def __init__(self, turn, hole_cards, community_cards, pot):
+    def __init__(self, turn, hole_cards, community_cards, pot, raise_turn = 0):
         self.hole_cards = hole_cards
         self.turn = turn
         self.opponent = 1 - self.turn
         self.community_cards = community_cards
         self.remainding_cards = 5 - len(community_cards)
         self.pot = pot
+        self.raise_turn = self.raise_turn
 
     def getBestAction(self):
-        import pdb;pdb.set_trace()
         actions = [self.raise_stakes, self.fold, self.see]
         results = {}
         for action in actions:
@@ -61,7 +63,6 @@ class DecisionNode:
             return self.expected_value()
 
         f = max if self.turn else min
-        import pdb;pdb.set_trace()
 
         actions = [self.raise_stakes, self.fold, self.see]
 
@@ -82,6 +83,8 @@ class DecisionNode:
         return win_prob * self.pot + (1-win_prob) * (-1) * self.pot
 
     def raise_stakes(self):
+        if self.raise_turn > RAISE_TURN_THRESHOLD:
+            return None
         return DecisionNode(self.opponent, self.hole_cards, self.community_cards, self.pot + 10)
     """
     Generates a next node that describes terminated value
@@ -98,7 +101,7 @@ class TerminalNode:
     def __init__(self, winner, pot):
         self.winner = winner
         self.pot = pot
-    def eval():
+    def eval(self):
         return (-1) * self.pot if self.winner else self.winner
 
 class ChanceNode:
