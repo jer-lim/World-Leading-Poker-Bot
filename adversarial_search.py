@@ -45,7 +45,7 @@ class DecisionNode:
         self.raise_turn = raise_turn
 
     def getBestAction(self, actions):
-        action_map = {"raise": self.raise_stakes, "fold":self.fold, "call":self.see}
+        action_map = {"raise": self.raise_stakes, "fold":self.fold, "call":self.call}
         action_funcs = [(action,action_map.get(action)) for action in actions]
         results = {}
         for label, func in action_funcs:
@@ -66,7 +66,7 @@ class DecisionNode:
 
         f = max if self.turn else min
 
-        actions = [self.raise_stakes, self.fold, self.see]
+        actions = [self.raise_stakes, self.fold, self.call]
 
         results = []
         for action in actions:
@@ -84,7 +84,9 @@ class DecisionNode:
                 community_card=self.community_cards
                 )
         return win_prob * self.pot + (1-win_prob) * (-1) * self.pot
-
+    """
+    Generates next node with raised stakes
+    """
     def raise_stakes(self):
         if self.raise_turn > RAISE_TURN_THRESHOLD:
             return None
@@ -93,11 +95,11 @@ class DecisionNode:
     Generates a next node that describes terminated value
     """
     def fold(self):
-        return TerminalNode(self.opponent, self.pot)
+        return FoldedNode(self.opponent, self.pot)
     """
     Generates the next node, allows it to go to chance phase
     """
-    def see(self):
+    def call(self):
         if self.remainding_cards == 0:
             return EndingNode(self.expected_value())
         return ChanceNode(self.hole_cards, self.community_cards, self.pot)
@@ -109,7 +111,7 @@ class EndingNode:
         return self.val
 
 
-class TerminalNode:
+class FoldedNode:
     def __init__(self, winner, pot):
         self.winner = winner
         self.pot = pot

@@ -1,18 +1,22 @@
-from pypokerengine.api.game import setup_config, start_poker
-from randomplayer import RandomPlayer
-from raise_player import RaisedPlayer
-from callbot import CallBot
-from scaramucci import BootStrapBot
+from pypokerengine.players import BasePokerPlayer
+from pypokerengine.utils.card_utils import gen_cards, estimate_hole_card_win_rate
+from pypokerengine.engine.hand_evaluator import HandEvaluator
+hole_card = gen_cards(['H7', 'S7'])
+community_card = gen_cards(['D2', 'HQ', 'C7'])
+import timeit
+"""
+func = lambda : estimate_hole_card_win_rate(
+        nb_simulation=100,
+        nb_player=2,
+        hole_card=gen_cards(hole_card),
+        community_card=gen_cards(community_card)
+        )
+time = timeit.timeit(func,number = 100)/100
+print("time: " + str(time))
+print(func())
 
-#TODO:config the config as our wish
-config = setup_config(max_round=1000, initial_stack=10000, small_blind_amount=10)
+"""
+from adversarial_search import AdversarialSeach
+tries = 100
 
-
-
-config.register_player(name="f1", algorithm=CallBot())
-config.register_player(name="FT2", algorithm=BootStrapBot())
-
-
-game_result = start_poker(config, verbose=0)
-print("Reference bot:" + str(game_result['players'][0]['stack']))
-print("New bot:" + str(game_result['players'][1]['stack']))
+print(timeit.timeit(lambda:AdversarialSeach(hole_card, community_card, 0).decide(["raise", "fold", "call"]), number=tries)/tries)
