@@ -1,24 +1,22 @@
 """
-This implementation of advesarial search ignores the size of the pot.
-It only models:
-1) Given the state of the community cards, current cards on hand
-2) three possible transition states of each player
-3) Whether the player is expected to win given a set of cards
-4) POST FLOP
+This implementation of advesarial search only models:
+1) The state of the community cards, current hole_cards of myself
+2) three possible transition states of each player (fold, call, raise)
+3) POST FLOP onwards(only 1 card generated at each Chance Node)
 
-This simple implementation makes a few assumptions:
-1) Currently at the start of the showdown phase.
-2) matching previous
+Decision Node: Represents decision node of myself or of opponent
+Ending Node: Represents the ending (i.e. when all possible cards are drawn)
+Folded Node: Represents the outcome from myself or opponent folding
+Chance Node: Represents the new card drawn
 
-Using MiniMax (hence probabilities/heuristic are not involved)
-Attempt to maximise utility given current set of hole cards/community cards
-Terminates after the last community card is drawn
+Heuristic adopted:
+Look at expected value of decision node:
+win_prob * self.pot + (1-win_prob) * (-1) * self.pot
 
 #TODO:
-1) ChanceNode currently returns ONE decision node, using a random card
-Try creating a new random function that returns a possible value in a whole category
-2) Refactor out random generation of opponent's hole cards so that it is only done once.
-3) (*) Rethink final decision node evaluation metric when turn ends
+1) ChanceNode currently returns ONE decision node by randomly drawing a card from deck.
+(*) Instead of trying all possible cards, consider wiping
+2) (*) Rethink final decision node evaluation metric s
 """
 
 indent = 0
@@ -121,12 +119,14 @@ class DecisionNode:
             return None
         indent_print(str(self.turn) + ": EXPLORE RAISED")
         return DecisionNode(self.opponent, self.hole_cards, self.community_cards, self.pot + 10, self.raise_turn + 1, called=True)
+
     """
     Generates a next node that describes terminated value
     """
     def fold(self):
         indent_print(str(self.turn) + ": EXPLORE FOLDED")
         return FoldedNode(self.opponent, self.pot)
+
     """
     Generates the next node, allows it to go to chance phase
     """
