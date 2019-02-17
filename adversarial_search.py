@@ -100,3 +100,10 @@ class TerminalNode:
     def eval():
         return (-1) * self.pot if self.winner else self.winner
 
+class ChanceNode:
+    def __init__(self, hole_cards, community_cards, pot):
+        self.hole_cards = hole_cards
+        self.community_cards = community_cards
+        self.pot = pot
+    def eval(self):
+        node = DecisionNode(0, self.hole_cards, self.community_cards, self.pot)
