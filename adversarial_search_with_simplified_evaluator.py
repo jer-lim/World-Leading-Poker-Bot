@@ -19,11 +19,13 @@ win_prob * self.pot + (1-win_prob) * (-1) * self.pot
 2) (*) Rethink final decision node evaluation metric s
 """
 
-from pypokerengine.utils.card_utils import evaluate_hand
+from pypokerengine.engine.hand_evaluator import HandEvaluator
+from collections import defaultdict
 indent = 0
 def indent_print(x):
     print("   " * indent + str(x))
 
+from pypokerengine.utils.card_utils import gen_cards, estimate_hole_card_win_rate, _pick_unused_card, gen_deck
 
 
 RAISE_TURN_THRESHOLD = 2
@@ -159,18 +161,27 @@ class ChanceNode:
         self.community_cards = community_cards
         self.pot = pot
     def eval(self):
+        """
+        Generates and checks only 1 card per meaningful outcome.
+        i.e. Given a set of cards, get all the cards that have not been drawn.
+        Check the outcome of the hand given the additional card. Outcomes can be
+        ONEPAIR, FLUSH, etc. Only 1 permutation that gives that outcome is checked.
+        """
+        # TODO: Optimise gen_hand_rank_info as there are currently alot of useless steps
+
         remaining_cards = gen_deck(exclude_cards = self.hole_cards + self.community_cards)
-        n = len(remaining_cards)
+        n = remaining_cards.size()
+        #Store the utility value given for that outcome
         memo = {}
+        #Number of counts that generates the OUTCOME
         count = defaultdict(int)
 
         while remaining_cards.size() > 0:
             new_card = remaining_cards.draw_card()
-            strength = evaluate_hand(self.hole_cards, self.community_cards + [new_card])["strength"]
+            strength = HandEvaluator.gen_hand_rank_info(self.hole_cards, self.community_cards + [new_card])["hand"]["strength"]
             if strength not in memo:
-                memo[strength] = DecisionNode(0, self.hole_cards, self.community_cards + new_card, self.pot).eval()
+                memo[strength] = DecisionNode(0, self.hole_cards, self.community_cards + [new_card], self.pot).eval()
             count[strength] += 1
 
-
-        indiv_contributions = [count[strength] * memo[strength] for strength in memo.keys()]
-        return sum(indiv_contributions)/n
+        #Return expected value
+        return sum([count[strength] * memo[strength] for strength in memo.keys()])/n
