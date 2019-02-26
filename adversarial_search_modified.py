@@ -1,22 +1,7 @@
 """
-This implementation of advesarial search only models:
-1) The state of the community cards, current hole_cards of myself
-2) three possible transition states of each player (fold, call, raise)
-3) POST FLOP onwards(only 1 card generated at each Chance Node)
+Refer to adversarial_search for original adversarial search.
+This implementation contains all the modified adversarial search
 
-Decision Node: Represents decision node of myself or of opponent
-Ending Node: Represents the ending (i.e. when all possible cards are drawn)
-Folded Node: Represents the outcome from myself or opponent folding
-Chance Node: Represents the new card drawn
-
-Heuristic adopted:
-Look at expected value of decision node:
-win_prob * self.pot + (1-win_prob) * (-1) * self.pot
-
-#TODO:
-1) ChanceNode currently returns ONE decision node by randomly drawing a card from deck.
-(*) Instead of trying all possible cards, consider wiping
-2) (*) Rethink final decision node evaluation metric s
 """
 
 from pypokerengine.engine.hand_evaluator import HandEvaluator
@@ -41,14 +26,14 @@ class AdversarialSeach:
         return node.getBestAction(actions)
 
 class DecisionNode:
-    def __init__(self, turn, hole_cards, community_cards, pot, raise_turn = 0, called=False):
+    def __init__(self, turn, hole_cards, community_cards, pot, raise_turn = 0, called_or_raised=False):
         """
         Params
         ------
         turn: 0 for my turn, 1 for opponent's turn
         hole_cards: my hole cards (random cards generated for opponent)
         raise_turn: current times in street that raise has been called
-        called: True if call or raise has been called once by opponent
+        called_or_raised: True if opponent called or raised right before
         """
 
         self.hole_cards = hole_cards
@@ -58,7 +43,7 @@ class DecisionNode:
         self.remaining_cards = 5 - len(community_cards)
         self.pot = pot
         self.raise_turn = raise_turn
-        self.called = called
+        self.called_or_raised = called_or_raised
 
     def getBestAction(self, actions):
         action_map = {"raise": self.raise_stakes, "fold":self.fold, "call":self.call}
@@ -85,7 +70,7 @@ class DecisionNode:
 
         indent_print("-MY TURN-"  if not (self.turn) else "-OPP TURN-")
         #Terminal node
-        if self.remaining_cards == 0 and not self.called:
+        if self.remaining_cards == 0 and not self.called_or_raised:
             indent -= 1
             return self.expected_value()
 
@@ -120,7 +105,7 @@ class DecisionNode:
         if self.raise_turn >= RAISE_TURN_THRESHOLD:
             return None
         indent_print(str(self.turn) + ": EXPLORE RAISED")
-        return DecisionNode(self.opponent, self.hole_cards, self.community_cards, self.pot + 10, self.raise_turn + 1, called=True)
+        return DecisionNode(self.opponent, self.hole_cards, self.community_cards, self.pot + 10, self.raise_turn + 1, called_or_raised=True)
 
     """
     Generates a next node that describes terminated value
@@ -134,12 +119,12 @@ class DecisionNode:
     """
     def call(self):
         indent_print(str(self.turn) + ": EXPLORE CALL")
-        if self.called:
+        if self.called_or_raised:
             if self.remaining_cards == 0:
                 return EndingNode(self.expected_value())
             else:
                 return ChanceNode(self.hole_cards, self.community_cards, self.pot)
-        return DecisionNode(self.opponent, self.hole_cards, self.community_cards, self.pot, called=True)
+        return DecisionNode(self.opponent, self.hole_cards, self.community_cards, self.pot, called_or_raised=True)
 
 class EndingNode:
     def __init__(self, val):
