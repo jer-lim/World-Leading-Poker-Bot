@@ -162,20 +162,18 @@ class ChanceNode:
         self.pot = pot
     def eval(self):
         """
-        Generates and checks only 1 card per meaningful outcome.
+        Generates and checks only 1 card per meaningful outcome. Returns expected utility.
         i.e. Given a set of cards, get all the cards that have not been drawn.
         Check the outcome of the hand given the additional card. Outcomes can be
         ONEPAIR, FLUSH, etc. Only 1 permutation that gives that outcome is checked.
         """
         # TODO: Optimise gen_hand_rank_info as there are currently alot of useless steps
-
         remaining_cards = gen_deck(exclude_cards = self.hole_cards + self.community_cards)
         n = remaining_cards.size()
         #Store the utility value given for that outcome
         memo = {}
         #Number of counts that generates the OUTCOME
         count = defaultdict(int)
-
         while remaining_cards.size() > 0:
             new_card = remaining_cards.draw_card()
             strength = HandEvaluator.gen_hand_rank_info(self.hole_cards, self.community_cards + [new_card])["hand"]["strength"]
