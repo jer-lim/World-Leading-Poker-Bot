@@ -1,6 +1,9 @@
 """
 Refer to adversarial_search for original adversarial search.
-This implementation contains all the modified adversarial search
+This implementation contains all the modifications to base adversarial search
+
+1) ChanceNode eval implementation: generating multiple outcomes
+2)
 
 """
 
