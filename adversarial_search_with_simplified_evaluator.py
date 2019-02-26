@@ -24,9 +24,6 @@ indent = 0
 def indent_print(x):
     print("   " * indent + str(x))
 
-class Cards:
-    def __init__(self):
-        self.
 
 
 RAISE_TURN_THRESHOLD = 2
