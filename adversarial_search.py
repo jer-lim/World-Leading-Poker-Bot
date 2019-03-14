@@ -1,11 +1,18 @@
 """
-Refer to adversarial_search for original adversarial search.
-This implementation contains all the modifications to base adversarial search
-
-1) ChanceNode eval implementation: generating multiple outcomes
-2)
-
+This implementation of advesarial search only models:
+1) The state of the community cards, current hole_cards of myself
+2) three possible transition states of each player (fold, call, raise)
+3) POST FLOP onwards
+Decision Node: Represents decision node of myself or of opponent
+Ending Node: Represents the ending (i.e. when all possible cards are drawn)
+Folded Node: Represents the outcome from myself or opponent folding
+Chance Node: Represents the new card drawn
+Heuristic adopted:
+Look at expected value of decision node:
+win_prob * self.pot + (1-win_prob) * (-1) * self.pot
 """
+
+
 
 from pypokerengine.engine.hand_evaluator import HandEvaluator
 from collections import defaultdict
