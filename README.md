@@ -21,7 +21,9 @@ import pypokerengine
 print("hello world")
 ```
 
-
+### Notes on directory structure
+`adversarial_search.py` contains the implementation of a base adversarial search
+`adversarial_search_example.py` contains an example of how to call adversarial search
 
 ### Create your own player
 #### Example player
