@@ -47,6 +47,13 @@ class DecisionNode:
         self.pot = pot
         self.raise_turn = raise_turn
         self.called_or_raised = called_or_raised
+        self.win_prob = estimate_hole_card_win_rate(
+                nb_simulation=10,
+                nb_player=2,
+                hole_card=self.hole_cards,
+                community_card=self.community_cards
+                )
+
 
     def getBestAction(self, actions):
         action_map = {"raise": self.raise_stakes, "fold":self.fold, "call":self.call}
@@ -93,14 +100,7 @@ class DecisionNode:
         return f(results)
 
     def expected_value(self):
-        cards = self.hole_cards
-        win_prob = estimate_hole_card_win_rate(
-                nb_simulation=10,
-                nb_player=2,
-                hole_card=cards,
-                community_card=self.community_cards
-                )
-        return win_prob * self.pot + (1-win_prob) * (-1) * self.pot
+        return self.win_prob * self.pot + (1-self.win_prob) * (-1) * self.pot
     """
     Generates next node with raised stakes
     """
