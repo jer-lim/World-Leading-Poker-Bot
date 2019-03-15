@@ -88,11 +88,11 @@ class DecisionNode:
         indent_print(results)
         return max(results, key=results.get)
 
-    """
-    Returns an expected utility value at the current node
-    """
-
     def eval(self):
+        """
+        Returns an expected utility value at the current node
+        """
+
         global indent
         indent += 1
 
@@ -120,11 +120,10 @@ class DecisionNode:
     def expected_value(self):
         return self.win_prob * self.pot + (1 - self.win_prob) * (-1) * self.pot
 
-    """
-    Generates next node with raised stakes
-    """
-
     def raise_stakes(self):
+        """
+        Generates next node with raised stakes
+        """
         if self.raise_turn >= RAISE_TURN_THRESHOLD:
             return None
         indent_print(str(self.turn) + ": EXPLORE RAISED")
@@ -136,19 +135,17 @@ class DecisionNode:
             self.raise_turn + 1,
             called_or_raised=True)
 
-    """
-    Generates a next node that describes terminated value
-    """
-
     def fold(self):
+        """
+        Generates a next node that describes terminated value
+        """
         indent_print(str(self.turn) + ": EXPLORE FOLDED")
         return FoldedNode(self.opponent, self.pot)
 
-    """
-    Generates the next node, allows it to go to chance phase
-    """
-
     def call(self):
+        """
+        Generates the next node, allows it to go to chance phase
+        """
         indent_print(str(self.turn) + ": EXPLORE CALL")
         if self.called_or_raised:
             if self.remaining_cards == 0:
