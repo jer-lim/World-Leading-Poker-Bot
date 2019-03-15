@@ -143,6 +143,12 @@ class DecisionNode:
     def expected_value(self):
         return self.win_prob * self.pot + (1 - self.win_prob) * (-1) * self.pot
 
+    def get_available_actions(self):
+        actions = [self.fold, self.call]
+        if self.raise_turn < RAISE_TURN_THRESHOLD:
+            actions.append(self.raise_stakes)
+        return actions
+
     def raise_stakes(self):
         """
         Generates next node with raised stakes
