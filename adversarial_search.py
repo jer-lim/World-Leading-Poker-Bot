@@ -99,7 +99,7 @@ class DecisionNode:
         indent_print(results)
         return max(results, key=results.get)
 
-    def eval(self):
+    def eval(self, alpha=-float("inf"), beta=float("inf")):
         """
         Returns an expected utility value at the current node
         """
@@ -108,12 +108,15 @@ class DecisionNode:
         indent += 1
 
         indent_print("-MY TURN-" if not (self.turn) else "-OPP TURN-")
-        #Terminal node
+        #Terminal node #TODO: Think about whether this is needed
         if self.remaining_cards == 0 and not self.called_or_raised:
             indent -= 1
             return self.expected_value()
 
-        f = max if self.turn == 0 else min
+        if self.turn == 0:
+            return self.max_value(alpha, beta)
+        else:
+            return self.min_value(alpha, beta)
 
         actions = [self.raise_stakes, self.fold, self.call]
 
