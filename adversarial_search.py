@@ -11,7 +11,7 @@ Heuristic adopted:
 Look at expected value of decision node:
 win_prob * self.pot + (1-win_prob) * (-1) * self.pot
 """
-
+import abc
 from pypokerengine.engine.hand_evaluator import HandEvaluator
 from collections import defaultdict
 indent = 0
@@ -35,6 +35,17 @@ class AdversarialSeach:
     def decide(self, actions):
         node = DecisionNode(0, self.hole_cards, self.community_cards, self.pot)
         return node.getBestAction(actions)
+
+class TerminalNode:
+    __metaclass__ = abc.ABCMeta
+
+    def max_value(self, alpha, beta):
+        return self.eval()
+    def min_value(self, alpha, beta):
+        return self.eval()
+    @abc.abstractmethod
+    def eval(self):
+        pass
 
 
 class DecisionNode:
