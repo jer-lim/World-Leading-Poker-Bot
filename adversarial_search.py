@@ -118,7 +118,16 @@ class DecisionNode:
         else:
             return self.min_value(alpha, beta)
 
-        actions = [self.raise_stakes, self.fold, self.call]
+    def max_value(self, alpha, beta):
+        actions = self.get_available_actions()
+
+        v = -float("inf")
+        for action in actions:
+            v = max(v, action().min_value(alpha,beta))
+            if v >= beta:
+                return v
+            alpha = max(alpha, v)
+        return v
 
         results = []
         for action in actions:
