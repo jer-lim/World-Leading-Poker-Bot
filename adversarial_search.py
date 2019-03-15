@@ -129,16 +129,16 @@ class DecisionNode:
             alpha = max(alpha, v)
         return v
 
-        results = []
+    def min_value(self, alpha, beta):
+        actions = self.get_available_actions()
+
+        v = float("inf")
         for action in actions:
-            node = action()
-            if node != None:
-                value = node.eval()
-                results.append(value)
-                indent_print(value)
-        indent_print("VALUE: " + str(f(results)))
-        indent -= 1
-        return f(results)
+            v = min(v, action().max_value(alpha, beta))
+            if v <= alpha:
+                return v
+            beta = min(beta, v)
+        return v
 
     def expected_value(self):
         return self.win_prob * self.pot + (1 - self.win_prob) * (-1) * self.pot
