@@ -190,7 +190,7 @@ class DecisionNode:
             called_or_raised=True)
 
 
-class EndingNode:
+class EndingNode(TerminalNode):
     def __init__(self, val):
         self.val = val
 
@@ -198,7 +198,7 @@ class EndingNode:
         return self.val
 
 
-class FoldedNode:
+class FoldedNode(TerminalNode):
     def __init__(self, winner, pot):
         self.winner = winner
         self.pot = pot
@@ -208,7 +208,7 @@ class FoldedNode:
         return (-1) * self.pot if self.winner else self.pot
 
 
-class ChanceNode:
+class ChanceNode(TerminalNode):
     def __init__(self, hole_cards, community_cards, pot):
         self.hole_cards = hole_cards
         self.community_cards = community_cards
