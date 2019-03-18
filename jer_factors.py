@@ -133,6 +133,12 @@ class DecomposedCards:
 	def haveStraightFlush(self):
 		return int(self.flushStrength() > 0 and self.straightStrength() > 0)
 
+	def haveFourOfAKind(self):
+		for rank in self.num_rank:
+			if self.num_rank[rank] == 4:
+				return 1
+		return 0
+
 cards = DecomposedCards(hole_card, community_card)
 
 print(cards.straightStrength())
