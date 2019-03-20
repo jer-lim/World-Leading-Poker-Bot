@@ -142,6 +142,21 @@ class DecomposedCards:
 				return 1
 		return 0
 
+	def haveFullHouse(self):
+		highest_trip = 0
+		highest_doub = 0
+		for rank in self.num_rank:
+			if self.num_rank[rank] >= 3 and rank > highest_trip:
+				if highest_doub < highest_trip:
+					highest_doub = highest_trip
+				highest_trip = rank
+			if self.num_rank[rank] >= 2 and rank > highest_doub and rank > highest_trip:
+				highest_doub = rank
+		return int(highest_trip > 0 and highest_doub > 0)
+
+	def haveFullHouseOrBetter(self):
+		return self.haveFullHouse() or self.haveStraightFlush() or self.haveFourOfAKind()
+
 	def highCard(self):
 		if self.hole_card_highest_rank > self.comm_card_highest_rank:
 			return self.hole_card_highest_rank
@@ -241,8 +256,8 @@ class DecomposedCards:
 		
 				
 ########## TEST ##########
-hole_card_list = ['CJ', 'HJ']
-community_card_list = ['DJ', 'D2', 'CQ', 'H4', 'DA']
+hole_card_list = ['C4', 'C3']
+community_card_list = ['D2', 'H5', 'SQ', 'D3', 'H3']
 
 hole_card = gen_cards(hole_card_list)
 community_card = gen_cards(community_card_list)                                                                
@@ -253,7 +268,9 @@ print("Community cards: " + str(community_card_list))
 print()
 print("straightStrength: " + str(cards.straightStrength()))
 print("flushStrength: "+ str(cards.flushStrength()))
-print("haveStraightFlush" + str(cards.haveStraightFlush()))
+print("haveStraightFlush: " + str(cards.haveStraightFlush()))
+print("haveFullHouse: " + str(cards.haveFullHouse()))
+print("haveFullHouseOrBetter: " + str(cards.haveFullHouseOrBetter()))
 print("possibleFlushes: " + str(cards.possibleFlushes()))
 print("highCard: " + str(cards.highCard()))
 print("singlePairStrength: " + str(cards.singlePairStrength()))
