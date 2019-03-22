@@ -24,18 +24,18 @@ class DecomposedCards:
 		for card in hole_card:
 			self.num_suits[card.suit] += 1
 			self.hole_card_num_suits[card.suit] += 1
-			if card.rank > self.suit_high[suit_num] and card.suit == suit_num:
-				self.suit_high[suit_num] = card.rank
-			if card.rank > self.hole_card_suit_high[suit_num] and card.suit == suit_num:
-				self.hole_card_suit_high[suit_num] = card.rank
+			if card.rank > self.suit_high[card.suit]:
+				self.suit_high[card.suit] = card.rank
+			if card.rank > self.hole_card_suit_high[card.suit]:
+				self.hole_card_suit_high[card.suit] = card.rank
 
 		for card in community_card:
 			self.num_suits[card.suit] += 1
 			self.comm_card_num_suits[card.suit] += 1
-			if card.rank > self.suit_high[suit_num] and card.suit == suit_num:
-				self.suit_high[suit_num] = card.rank
-			if card.rank > self.comm_card_suit_high[suit_num] and card.suit == suit_num:
-				self.comm_card_suit_high[suit_num] = card.rank
+			if card.rank > self.suit_high[card.suit]:
+				self.suit_high[card.suit] = card.rank
+			if card.rank > self.comm_card_suit_high[card.suit]:
+				self.comm_card_suit_high[card.suit] = card.rank
 
 		# Count ranks
 		self.num_rank = {}
