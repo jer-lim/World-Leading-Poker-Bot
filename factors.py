@@ -205,7 +205,7 @@ class DecomposedCards:
 				elif pattern == 29:
 					count += 4 - self.hole_card_num_rank[rank-1]
 				# No fast way to estimate when 2 cards are needed
-				elif bin(s).count('1') == 3:
+				elif bin(pattern).count('1') == 3:
 					count += 4 # idk what number to put here but it should definitely be low
 		return count
 
@@ -256,7 +256,7 @@ class DecomposedCards:
 				
 ########## TEST ##########
 hole_card_list = ['C4', 'C3']
-community_card_list = ['D2', 'H5', 'SQ', 'D3', 'H3']
+community_card_list = ['D2', 'H4', 'SQ', 'D3', 'H3']
 
 hole_card = gen_cards(hole_card_list)
 community_card = gen_cards(community_card_list)                                                                
@@ -265,16 +265,18 @@ cards = DecomposedCards(hole_card, community_card)
 print("Hole cards: " + str(hole_card_list))
 print("Community cards: " + str(community_card_list))
 print()
-print("singlePairStrength: " + str(cards.singlePairStrength()))
-print("numberOfHigherFormableSinglePairs: " + str(cards.numberOfHigherFormableSinglePairs()))
-print("numberOfOuts: " + str(cards.numberOfOuts()))
-print("doublePairStrength: " + str(cards.doublePairStrength()))
-print("tripleStrength: " + str(cards.tripleStrength()))
-print("numberOfHigherFormableTriples: " + str(cards.numberOfHigherFormableTriples()))
-print("straightStrength: " + str(cards.straightStrength()))
-print("flushStrength: "+ str(cards.flushStrength()))
+print("0 highCard: " + str(cards.highCard()))
+print("1 singlePairStrength: " + str(cards.singlePairStrength()))
+print("2 numberOfHigherFormableSinglePairs: " + str(cards.numberOfHigherFormableSinglePairs()))
+print("3 numberOfOuts: " + str(cards.numberOfOuts()))
+print("4 doublePairStrength: " + str(cards.doublePairStrength()))
+print("5")
+print("6 tripleStrength: " + str(cards.tripleStrength()))
+print("7 numberOfHigherFormableTriples: " + str(cards.numberOfHigherFormableTriples()))
+print("8 straightStrength: " + str(cards.straightStrength()))
+print("9 possibleStraights: " + str(cards.possibleStraights()))
+print("10 flushStrength: "+ str(cards.flushStrength()))
+print("11 possibleFlushes: "+ str(cards.possibleFlushes()))
 print("haveStraightFlush: " + str(cards.haveStraightFlush()))
 print("haveFullHouse: " + str(cards.haveFullHouse()))
-print("haveFullHouseOrBetter: " + str(cards.haveFullHouseOrBetter()))
-print("possibleFlushes: " + str(cards.possibleFlushes()))
-print("highCard: " + str(cards.highCard()))
+print("INF haveFullHouseOrBetter: " + str(cards.haveFullHouseOrBetter()))
