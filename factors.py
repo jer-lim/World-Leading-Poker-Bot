@@ -66,97 +66,6 @@ class DecomposedCards:
 			if card.rank > self.comm_card_highest_rank:
 				self.comm_card_highest_rank = card.rank
 
-	# Highest rank in a flush
-	def flushStrength(self):
-		for suit in self.num_suits:
-			if self.num_suits[suit] >= 5:
-				return self.suit_high[suit]
-		return 0
-
-	# Quick estimate number of possible flushes
-	def possibleFlushes(self):
-		count = 0
-		for suit in self.comm_card_num_suits:
-			if self.comm_card_num_suits[suit] >= 3:
-				# Estimate number of flushes higher than the one we have, if we have any
-				if self.num_suits[suit] >= 5:
-					count += 14 - self.suit_high[suit]
-				# If we don't have any, count all possible flushes
-				else:
-					count += 13 - self.num_suits[suit]
-		return count
-
-	# Highest rank in a straight
-	def straightStrength(self):
-		# Look for chain of 5
-		highest_rank = 0
-		chain = 0
-		for rank in self.num_rank:
-			if self.num_rank[rank] == 0:
-				chain = 0
-			else:
-				chain += 1
-			if chain == 5:
-				highest_rank = rank
-		return highest_rank
-
-	def possibleStraights(self):
-		myStraightStrength = self.straightStrength()
-		count = 0
-		pattern = 0
-		# Bit magic to find pattern in last 5 ranks
-		for rank in self.comm_card_num_rank:
-			if pattern >= 16:
-				pattern -= 16
-			pattern = pattern << 1
-			if self.comm_card_num_rank[rank] >= 1:
-				pattern += 1
-			if rank > myStraightStrength:
-				# 11110
-				if pattern == 30:
-					count += 4 - self.hole_card_num_rank[rank]
-				# 01111
-				elif pattern == 15 and rank >= 5:
-					count += 4 - self.hole_card_num_rank[rank-4]
-				# 10111
-				elif pattern == 23:
-					count += 4 - self.hole_card_num_rank[rank-3]
-				# 11011
-				elif pattern == 27:
-					count += 4 - self.hole_card_num_rank[rank-2]
-				# 11101
-				elif pattern == 29:
-					count += 4 - self.hole_card_num_rank[rank-1]
-				# No fast way to estimate when 2 cards are needed
-				elif bin(s).count('1') == 3:
-					count += 4 # idk what number to put here but it should definitely be low
-		return count
-
-
-	def haveStraightFlush(self):
-		return int(self.flushStrength() > 0 and self.straightStrength() > 0)
-
-	def haveFourOfAKind(self):
-		for rank in self.num_rank:
-			if self.num_rank[rank] == 4:
-				return 1
-		return 0
-
-	def haveFullHouse(self):
-		highest_trip = 0
-		highest_doub = 0
-		for rank in self.num_rank:
-			if self.num_rank[rank] >= 3 and rank > highest_trip:
-				if highest_doub < highest_trip:
-					highest_doub = highest_trip
-				highest_trip = rank
-			if self.num_rank[rank] >= 2 and rank > highest_doub and rank > highest_trip:
-				highest_doub = rank
-		return int(highest_trip > 0 and highest_doub > 0)
-
-	def haveFullHouseOrBetter(self):
-		return self.haveFullHouse() or self.haveStraightFlush() or self.haveFourOfAKind()
-
 	def highCard(self):
 		if self.hole_card_highest_rank > self.comm_card_highest_rank:
 			return self.hole_card_highest_rank
@@ -253,6 +162,96 @@ class DecomposedCards:
 				if rank > myTripleStrength and self.comm_card_num_rank[rank] > 0:
 					num_higher_formable_triples += 1
 		return num_higher_formable_triples
+
+	# Highest rank in a straight
+	def straightStrength(self):
+		# Look for chain of 5
+		highest_rank = 0
+		chain = 0
+		for rank in self.num_rank:
+			if self.num_rank[rank] == 0:
+				chain = 0
+			else:
+				chain += 1
+			if chain == 5:
+				highest_rank = rank
+		return highest_rank
+
+	def possibleStraights(self):
+		myStraightStrength = self.straightStrength()
+		count = 0
+		pattern = 0
+		# Bit magic to find pattern in last 5 ranks
+		for rank in self.comm_card_num_rank:
+			if pattern >= 16:
+				pattern -= 16
+			pattern = pattern << 1
+			if self.comm_card_num_rank[rank] >= 1:
+				pattern += 1
+			if rank > myStraightStrength:
+				# 11110
+				if pattern == 30:
+					count += 4 - self.hole_card_num_rank[rank]
+				# 01111
+				elif pattern == 15 and rank >= 5:
+					count += 4 - self.hole_card_num_rank[rank-4]
+				# 10111
+				elif pattern == 23:
+					count += 4 - self.hole_card_num_rank[rank-3]
+				# 11011
+				elif pattern == 27:
+					count += 4 - self.hole_card_num_rank[rank-2]
+				# 11101
+				elif pattern == 29:
+					count += 4 - self.hole_card_num_rank[rank-1]
+				# No fast way to estimate when 2 cards are needed
+				elif bin(s).count('1') == 3:
+					count += 4 # idk what number to put here but it should definitely be low
+		return count
+
+	# Highest rank in a flush
+	def flushStrength(self):
+		for suit in self.num_suits:
+			if self.num_suits[suit] >= 5:
+				return self.suit_high[suit]
+		return 0
+
+	# Quick estimate number of possible flushes
+	def possibleFlushes(self):
+		count = 0
+		for suit in self.comm_card_num_suits:
+			if self.comm_card_num_suits[suit] >= 3:
+				# Estimate number of flushes higher than the one we have, if we have any
+				if self.num_suits[suit] >= 5:
+					count += 14 - self.suit_high[suit]
+				# If we don't have any, count all possible flushes
+				else:
+					count += 13 - self.num_suits[suit]
+		return count
+
+	def haveStraightFlush(self):
+		return int(self.flushStrength() > 0 and self.straightStrength() > 0)
+
+	def haveFourOfAKind(self):
+		for rank in self.num_rank:
+			if self.num_rank[rank] == 4:
+				return 1
+		return 0
+
+	def haveFullHouse(self):
+		highest_trip = 0
+		highest_doub = 0
+		for rank in self.num_rank:
+			if self.num_rank[rank] >= 3 and rank > highest_trip:
+				if highest_doub < highest_trip:
+					highest_doub = highest_trip
+				highest_trip = rank
+			if self.num_rank[rank] >= 2 and rank > highest_doub and rank > highest_trip:
+				highest_doub = rank
+		return int(highest_trip > 0 and highest_doub > 0)
+
+	def haveFullHouseOrBetter(self):
+		return self.haveFullHouse() or self.haveStraightFlush() or self.haveFourOfAKind()
 		
 				
 ########## TEST ##########
