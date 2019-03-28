@@ -23,7 +23,7 @@ def indent_print(x):
 
 from pypokerengine.utils.card_utils import gen_cards, estimate_hole_card_win_rate, _pick_unused_card, gen_deck
 
-RAISE_TURN_THRESHOLD = 2
+RAISE_TURN_THRESHOLD = 4
 
 
 class AdversarialSeach:
