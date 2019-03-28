@@ -54,6 +54,7 @@ class DecisionNode:
                  hole_cards,
                  community_cards,
                  pot,
+                 win_prob=None,
                  raise_turn=0,
                  opponent_called=False,
                  opponent_raised=False):
@@ -76,11 +77,13 @@ class DecisionNode:
         self.raise_turn = raise_turn
         self.opponent_called = opponent_called
         self.opponent_raised = opponent_raised
-        self.win_prob = estimate_hole_card_win_rate(
-            nb_simulation=10,
-            nb_player=2,
-            hole_card=self.hole_cards,
-            community_card=self.community_cards)
+        if not win_prob:
+            win_prob = estimate_hole_card_win_rate(
+                nb_simulation=10,
+                nb_player=2,
+                hole_card=self.hole_cards,
+                community_card=self.community_cards)
+        self.win_prob = win_prob
 
     def getBestAction(self, actions):
         action_map = {
@@ -165,6 +168,7 @@ class DecisionNode:
             self.hole_cards,
             self.community_cards,
             self.pot + increment_val,
+            win_prob = self.win_prob,
             raise_turn = self.raise_turn + 1,
             opponent_raised=True)
 
@@ -193,6 +197,7 @@ class DecisionNode:
             self.hole_cards,
             self.community_cards,
             self.pot,
+            win_prob = self.win_prob,
             opponent_called=True)
 
 
