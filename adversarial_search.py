@@ -55,14 +55,16 @@ class DecisionNode:
                  community_cards,
                  pot,
                  raise_turn=0,
-                 called_or_raised=False):
+                 opponent_called=False,
+                 opponent_raised=False):
         """
         Params
         ------
         turn: 0 for my turn, 1 for opponent's turn
         hole_cards: my hole cards (random cards generated for opponent)
         raise_turn: current times in street that raise has been called
-        called_or_raised: True if opponent called or raised right before
+        opponent_called: True if opponent called right before
+        opponent_raised: True if opponent raised right before
         """
 
         self.hole_cards = hole_cards
@@ -72,7 +74,8 @@ class DecisionNode:
         self.remaining_cards = 5 - len(community_cards)
         self.pot = pot
         self.raise_turn = raise_turn
-        self.called_or_raised = called_or_raised
+        self.opponent_called = opponent_called
+        self.opponent_raised = opponent_raised
         self.win_prob = estimate_hole_card_win_rate(
             nb_simulation=10,
             nb_player=2,
@@ -156,13 +159,18 @@ class DecisionNode:
         if self.raise_turn >= RAISE_TURN_THRESHOLD:
             return None
         indent_print(str(self.turn) + ": EXPLORE RAISED")
+        if self.opponent_raised:
+            #Counter raise
+            increment_val = 20
+        else:
+            increment_val = 10
         return DecisionNode(
             self.opponent,
             self.hole_cards,
             self.community_cards,
-            self.pot + 10,
-            self.raise_turn + 1,
-            called_or_raised=True)
+            self.pot + increment_val,
+            raise_turn = self.raise_turn + 1,
+            opponent_raised=True)
 
     def fold(self):
         """
@@ -176,7 +184,9 @@ class DecisionNode:
         Generates the next node, allows it to go to chance phase
         """
         indent_print(str(self.turn) + ": EXPLORE CALL")
-        if self.called_or_raised:
+        if self.opponent_called or self.opponent_raised:
+            if self.opponent_raised:
+                self.pot += 10
             if self.remaining_cards == 0:
                 return EndingNode(self.expected_value())
             else:
@@ -187,7 +197,7 @@ class DecisionNode:
             self.hole_cards,
             self.community_cards,
             self.pot,
-            called_or_raised=True)
+            opponent_called=True)
 
 
 class EndingNode(TerminalNode):
