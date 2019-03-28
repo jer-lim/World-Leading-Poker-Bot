@@ -111,10 +111,6 @@ class DecisionNode:
         indent += 1
 
         indent_print("-MY TURN-" if not (self.turn) else "-OPP TURN-")
-        #Terminal node #TODO: Think about whether this is needed
-        if self.remaining_cards == 0 and not self.called_or_raised:
-            indent -= 1
-            return self.expected_value()
 
         if self.turn == 0:
             return self.max_value(alpha, beta)
