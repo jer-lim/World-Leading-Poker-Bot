@@ -30,19 +30,19 @@ class FASTHeuristic:
 
 		# Calculate flush [10, 11]
 		factors[10] = cards.flushStrength()
-		factors[11] = cards.possibleFlushes()
+		factors[11] = -cards.possibleFlushes()
 		if factors[10] > 0:
 			return self.__linearCombination(factors)
 
 		# Calculate straights
 		factors[8] = cards.straightStrength()
-		factors[9] = cards.possibleStraights()
+		factors[9] = -cards.possibleStraights()
 		if factors[8] > 0:
 			return self.__linearCombination(factors)
 
 		# Calculate triples and outs
 		factors[6] = cards.tripleStrength()
-		factors[7] = cards.numberOfHigherFormableTriples()
+		factors[7] = -cards.numberOfHigherFormableTriples()
 		factors[3] = cards.numberOfOuts()
 		if factors[6] > 0:
 			return self.__linearCombination(factors)
@@ -55,7 +55,7 @@ class FASTHeuristic:
 
 		# Calculate pairs
 		factors[1] = cards.singlePairStrength()
-		factors[2] = cards.numberOfHigherFormableSinglePairs()
+		factors[2] = -cards.numberOfHigherFormableSinglePairs()
 		if factors[1] > 0:
 			return self.__linearCombination(factors)
 
