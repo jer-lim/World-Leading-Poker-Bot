@@ -6,13 +6,12 @@ import math
 action_weights = [1, 1, 1] # Initialise their weights to 1: [Call, Raise, Fold] accordingly
 def MWU(action_weights, factor_to_punish, punish_constant, loss): #factor_to_punish should be the previous move made
     punish_rate = math.exp(-punish_constant*loss)
-    if factor_to_punish == "Call":
+    if factor_to_punish == "call":
         action_weights = [action_weights[0]*punish_rate, action_weights[1], action_weights[2]]
-    elif factor_to_punish == "Raise":
+    elif factor_to_punish == "raise":
         action_weights = [action_weights[0], action_weights[1]*punish_rate, action_weights[2]]
-    elif factor_to_punish == "Fold":
+    elif factor_to_punish == "fold":
         action_weights = [action_weights[0], action_weights[1], action_weights[2]*punish_rate]
     else:
         pass
     return action_weights
-    
