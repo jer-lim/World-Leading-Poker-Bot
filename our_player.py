@@ -40,7 +40,6 @@ class OurPlayer(BasePokerPlayer):
     def receive_round_start_message(self, round_count, hole_card, seats):
 
         self.stack_start_round = list(filter(lambda x: x["uuid"] == self.uuid, seats))[0]["stack"]
-        print(self.stack_start_round)
 
 
     def receive_street_start_message(self, street, round_state):
@@ -50,17 +49,11 @@ class OurPlayer(BasePokerPlayer):
         pass
 
     def receive_round_result_message(self, winners, hand_info, round_state):
-        """
-        print("END")
-        print(round_state)
-        print(hand_info)
-        print(winners)
-        print("==========================================")
-        """
         if len(winners) == 0: #Safety check
             return
         new_stack = list(filter(lambda x: x["uuid"] == self.uuid, round_state["seats"]))[0]["stack"]
-        self.action_weights = MWU(self.action_weights, self.last_action, 0.01, self.stack_start_round - new_stack)
+        self.action_weights = MWU(self.action_weights, self.last_action, 0.001, self.stack_start_round - new_stack)
+        print("Loss: {}, Last action: {}".format((self.stack_start_round-new_stack), self.last_action))
         print(self.action_weights)
 
 
