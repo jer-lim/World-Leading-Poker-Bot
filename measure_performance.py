@@ -8,14 +8,14 @@ from argparse import ArgumentParser
 from random_player import RandomPlayer
 from raise_player import RaisedPlayer
 from call_player import CallPlayer
-
+from our_player import OurPlayer
 """
 The module measures the performance of an agent
 Assign the player you want to test as MY_PLAYER (Make sure you import the player)
 
 Run `python measure_performance.py` in root directory
 """
-MY_PLAYER = RandomPlayer()
+MY_PLAYER = OurPlayer()
 
 def testperf(agent_name1, agent1, agent_name2, agent2):
     num_game = 100
