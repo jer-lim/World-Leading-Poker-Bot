@@ -31,9 +31,10 @@ def MWU(action_weights, factor_to_punish, punish_constant,
 
 class OurPlayer(BasePokerPlayer):
     def __init__(self):
-        self.action_weights = [1, 1, 1]
+        self.action_weights = [1, 1.1, 0.9]
         self.stack_start_round = 0
         self.last_action = "call"
+        self.action_counts = [0,0]
 
     def declare_action(self, valid_actions, hole_card, round_state):
         if round_state["street"] == "preflop":
@@ -46,6 +47,10 @@ class OurPlayer(BasePokerPlayer):
             hole_cards, community_cards,
             pot).decide([action.get("action") for action in valid_actions],
                         self.action_weights)
+        if self.last_action == "call":
+            self.action_counts[0] += 1
+        else:
+            self.action_counts[1] += 1
         return self.last_action
 
     def receive_game_start_message(self, game_info):
@@ -54,6 +59,7 @@ class OurPlayer(BasePokerPlayer):
 
 
     def receive_round_start_message(self, round_count, hole_card, seats):
+        self.action_counts = [0,0]
 
         self.stack_start_round = list(
             filter(lambda x: x["uuid"] == self.uuid, seats))[0]["stack"]
@@ -70,10 +76,23 @@ class OurPlayer(BasePokerPlayer):
         new_stack = list(
             filter(lambda x: x["uuid"] == self.uuid,
                    round_state["seats"]))[0]["stack"]
-        self.action_weights = MWU(self.action_weights, self.last_action, 0.0000001,
-                                  self.stack_start_round - new_stack)
-        print("Loss: {}, Last action: {}".format(
-            (self.stack_start_round - new_stack), self.last_action))
+        to_penalize = self.last_action
+        if to_penalize == "fold":
+            self.action_weights = MWU(self.action_weights, self.last_action, 0.000001,
+                                      self.stack_start_round - new_stack)
+        else:
+            if self.action_counts[0] > self.action_counts[1]:
+                self.action_weights = MWU(self.action_weights, "call", 0.000001,
+                                          self.stack_start_round - new_stack)
+                self.action_weights = MWU(self.action_weights, "raise", 0.000001,
+                                        self.stack_start_round - new_stack)
+            else:
+                self.action_weights = MWU(self.action_weights, "raise", 0.000001,
+                                          self.stack_start_round - new_stack)
+
+
+        print("Loss: {}, Last action: {}, call - raise: {}".format(
+            (self.stack_start_round - new_stack), self.last_action, self.action_counts[0]-self.action_counts[1]))
         print(self.action_weights)
 
 
