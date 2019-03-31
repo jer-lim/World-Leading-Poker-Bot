@@ -109,8 +109,14 @@ class DecisionNode:
                          str(value))
             indent_print("----------------------------------")
             if value != None:
-                results[label] = value * weights[corresponding_vals[label]]
+                results[label] = value
         indent_print(results)
+        min_value = min(results.values())
+        for key, val in results.items():
+            if min_value < 0:
+                results[key] = (val - 2 * min_value) * weights[corresponding_vals[label]]
+            else:
+                results[key] = val * weights[corresponding_vals[label]]
         return max(results, key=results.get)
 
     def eval(self, alpha=-float("inf"), beta=float("inf")):
