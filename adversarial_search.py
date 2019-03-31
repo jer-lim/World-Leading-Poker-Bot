@@ -104,10 +104,10 @@ class DecisionNode:
         results = {}
         for label, func in action_funcs:
             node = func()
-            print("TESTING ACTION: " + str(label))
+            indent_print("TESTING ACTION: " + str(label))
             value = node.eval()
-            print("DONE TESTING ACTION: " + str(label) + " VAL:" + str(value))
-            print("----------------------------------")
+            indent_print("DONE TESTING ACTION: " + str(label) + " VAL:" + str(value))
+            indent_print("----------------------------------")
             if value != None:
                 results[label] = value * weights[corresponding_vals[label]]
         indent_print(results)
@@ -120,8 +120,10 @@ class DecisionNode:
 
         global indent
         indent += 1
-
         indent_print("-MY TURN-" if not (self.turn) else "-OPP TURN-")
+        #Trims search tree for flop
+        if self.remaining_cards == 1 and self.is_flop:
+            return self.expected_value()
 
         if self.turn == 0:
             return self.max_value(alpha, beta)
