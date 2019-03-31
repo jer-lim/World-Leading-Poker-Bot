@@ -34,16 +34,20 @@ class AdversarialSeach:
         self.pot = pot
 
     def decide(self, actions, weights):
-        node = DecisionNode(0, self.hole_cards, self.community_cards, self.pot, len(self.community_cards) == 3)
+        node = DecisionNode(0, self.hole_cards, self.community_cards, self.pot,
+                            len(self.community_cards) == 3)
         return node.getBestAction(actions, weights)
+
 
 class TerminalNode:
     __metaclass__ = abc.ABCMeta
 
     def max_value(self, alpha, beta):
         return self.eval()
+
     def min_value(self, alpha, beta):
         return self.eval()
+
     @abc.abstractmethod
     def eval(self):
         pass
@@ -59,8 +63,7 @@ class DecisionNode:
                  win_prob=None,
                  raise_turn=0,
                  opponent_called=False,
-                 opponent_raised=False
-                 ):
+                 opponent_raised=False):
         """
         Params
         ------
@@ -90,11 +93,7 @@ class DecisionNode:
         self.win_prob = win_prob
 
     def getBestAction(self, actions, weights):
-        corresponding_vals = {
-            "raise": 0,
-            "fold": 1,
-            "call": 2
-        }
+        corresponding_vals = {"raise": 0, "fold": 1, "call": 2}
         action_map = {
             "raise": self.raise_stakes,
             "fold": self.fold,
@@ -106,7 +105,8 @@ class DecisionNode:
             node = func()
             indent_print("TESTING ACTION: " + str(label))
             value = node.eval()
-            indent_print("DONE TESTING ACTION: " + str(label) + " VAL:" + str(value))
+            indent_print("DONE TESTING ACTION: " + str(label) + " VAL:" +
+                         str(value))
             indent_print("----------------------------------")
             if value != None:
                 results[label] = value * weights[corresponding_vals[label]]
@@ -135,7 +135,7 @@ class DecisionNode:
 
         v = -float("inf")
         for action in actions:
-            v = max(v, action().min_value(alpha,beta))
+            v = max(v, action().min_value(alpha, beta))
             if v >= beta:
                 return v
             alpha = max(alpha, v)
@@ -179,8 +179,8 @@ class DecisionNode:
             self.community_cards,
             self.pot + increment_val,
             self.is_flop,
-            win_prob = self.win_prob,
-            raise_turn = self.raise_turn + 1,
+            win_prob=self.win_prob,
+            raise_turn=self.raise_turn + 1,
             opponent_raised=True)
 
     def fold(self):
@@ -209,7 +209,7 @@ class DecisionNode:
             self.community_cards,
             self.pot,
             self.is_flop,
-            win_prob = self.win_prob,
+            win_prob=self.win_prob,
             opponent_called=True)
 
 
