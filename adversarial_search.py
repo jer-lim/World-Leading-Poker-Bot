@@ -24,7 +24,7 @@ def indent_print(x):
 
 from pypokerengine.utils.card_utils import gen_cards, estimate_hole_card_win_rate, _pick_unused_card, gen_deck
 
-RAISE_TURN_THRESHOLD = 2
+RAISE_TURN_THRESHOLD = 4
 
 
 class AdversarialSeach:
@@ -93,7 +93,7 @@ class DecisionNode:
         self.win_prob = win_prob
 
     def getBestAction(self, actions, weights):
-        corresponding_vals = {"raise": 0, "fold": 1, "call": 2}
+        corresponding_vals = {"call": 0, "raise": 1, "fold": 2}
         action_map = {
             "raise": self.raise_stakes,
             "fold": self.fold,
