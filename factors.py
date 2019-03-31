@@ -49,7 +49,7 @@ class FASTHeuristic:
 
 		# Calculate 2 pairs
 		factors[4] = cards.doublePairStrength()
-		factors[5] = cards.numberOfHigherFormableDoublePairs()
+		factors[5] = -cards.numberOfHigherFormableDoublePairs()
 		if factors[4] > 0:
 			return self.__linearCombination(factors)
 
