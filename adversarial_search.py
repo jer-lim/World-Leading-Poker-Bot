@@ -32,9 +32,9 @@ class AdversarialSeach:
         self.community_cards = community_cards
         self.pot = pot
 
-    def decide(self, actions):
+    def decide(self, actions, weights):
         node = DecisionNode(0, self.hole_cards, self.community_cards, self.pot)
-        return node.getBestAction(actions)
+        return node.getBestAction(actions, weights)
 
 class TerminalNode:
     __metaclass__ = abc.ABCMeta
@@ -85,7 +85,12 @@ class DecisionNode:
                 community_card=self.community_cards)
         self.win_prob = win_prob
 
-    def getBestAction(self, actions):
+    def getBestAction(self, actions, weights):
+        corresponding_vals = {
+            "raise": 0,
+            "fold": 1,
+            "call": 2
+        }
         action_map = {
             "raise": self.raise_stakes,
             "fold": self.fold,
@@ -99,9 +104,8 @@ class DecisionNode:
             value = node.eval()
             print("DONE TESTING ACTION: " + str(label) + " VAL:" + str(value))
             print("----------------------------------")
-
             if value != None:
-                results[label] = value
+                results[label] = value * weights[corresponding_vals[label]]
         indent_print(results)
         return max(results, key=results.get)
 
