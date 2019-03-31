@@ -49,8 +49,9 @@ class OurPlayer(BasePokerPlayer):
         return self.last_action
 
     def receive_game_start_message(self, game_info):
+        self.action_weights = [1,1,1]
+        return
 
-        pass
 
     def receive_round_start_message(self, round_count, hole_card, seats):
 
@@ -69,7 +70,7 @@ class OurPlayer(BasePokerPlayer):
         new_stack = list(
             filter(lambda x: x["uuid"] == self.uuid,
                    round_state["seats"]))[0]["stack"]
-        self.action_weights = MWU(self.action_weights, self.last_action, 0.001,
+        self.action_weights = MWU(self.action_weights, self.last_action, 0.0000001,
                                   self.stack_start_round - new_stack)
         print("Loss: {}, Last action: {}".format(
             (self.stack_start_round - new_stack), self.last_action))
