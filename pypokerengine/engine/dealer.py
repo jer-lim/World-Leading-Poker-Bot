@@ -1,4 +1,5 @@
 import random
+import pandas as pd
 from collections import OrderedDict
 
 from pypokerengine.engine.poker_constants import PokerConstants as Const
@@ -29,6 +30,7 @@ class Dealer:
       self.message_summarizer.verbose = verbose
 
   def start_game(self, max_round):
+    self.table.data = pd.DataFrame(index=range(1, max_round+1), columns=[x.name for x in self.table.seats.players])
     table = self.table
     self.__notify_game_start(max_round)
     ante, sb_amount = self.ante, self.small_blind_amount
@@ -38,8 +40,8 @@ class Dealer:
       if self.__is_game_finished(table): break
       table = self.play_round(round_count, sb_amount, ante, table)
       table.shift_dealer_btn()
-    return self.__generate_game_result(max_round, table.seats)
-  
+    return self.__generate_game_result(max_round, table.seats), self.table.data
+
   def play_round(self, round_count, blind_amount, ante, table):
     state, msgs = RoundManager.start_new_round(round_count, blind_amount, ante, table)
     while True:
@@ -51,6 +53,10 @@ class Dealer:
       else:  # finish the round after publish round result
         self.__publish_messages(msgs)
         break
+
+    #Storing round info
+    for player in state["table"].seats.players:
+        self.table.data[player.name][round_count] = player.stack
     return state["table"]
 
 
@@ -273,4 +279,3 @@ class MessageSummarizer(object):
     def summairze_blind_level_update(self, round_count, old_ante, new_ante, old_sb_amount, new_sb_amount):
         base = 'Blind level update at round-%d : Ante %s -> %s, SmallBlind %s -> %s'
         return base % (round_count, old_ante, new_ante, old_sb_amount, new_sb_amount)
-

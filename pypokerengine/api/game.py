@@ -13,8 +13,8 @@ def start_poker(config, verbose=2):
     for info in config.players_info:
         dealer.register_player(info["name"], info["algorithm"])
         # print(info["algorithm"].declare_action)
-    result_message = dealer.start_game(config.max_round)
-    return _format_result(result_message)
+    result_message, result = dealer.start_game(config.max_round)
+    return _format_result(result_message), result
 
 def _format_result(result_message):
     return {
@@ -52,4 +52,3 @@ class Config(object):
             detail_msg = "no player is registered yet" if player_num==0 else "you registered only 1 player"
             base_msg = "At least 2 players are needed to start the game"
             raise Exception("%s (but %s.)" % (base_msg, detail_msg))
-
