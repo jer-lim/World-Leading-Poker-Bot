@@ -18,8 +18,8 @@ Run `python measure_performance.py` in root directory
 MY_PLAYER = OurPlayer()
 
 def testperf(agent_name1, agent1, agent_name2, agent2):
-    num_game = 100
-    max_round = 1000
+    num_game = 10
+    max_round = 100
     initial_stack = 10000
     smallblind_amount = 20
 
