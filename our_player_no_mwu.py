@@ -1,6 +1,6 @@
 from pypokerengine.players import BasePokerPlayer
 import random as rand
-from adversarial_search import AdversarialSeach
+from adversarial_search import AdversarialSearch
 import math
 
 from pypokerengine.utils.card_utils import gen_cards
@@ -68,4 +68,4 @@ class OurPlayerCopy(BasePokerPlayer):
 
 
 def setup_ai():
-    return RandomPlayer()
+    return OurPlayerCopy()
