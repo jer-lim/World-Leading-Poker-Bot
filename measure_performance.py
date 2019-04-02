@@ -9,7 +9,7 @@ from random_player import RandomPlayer
 from raise_player import RaisedPlayer
 from call_player import CallPlayer
 from our_player import OurPlayer
-from our_player_copy import OurPlayerCopy
+from our_player_no_mwu import OurPlayerCopy
 
 import pandas as pd
 """

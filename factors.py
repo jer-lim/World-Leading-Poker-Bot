@@ -64,7 +64,7 @@ class FASTHeuristic:
 		return self.__linearCombination(factors)
 
 	def __linearCombination(self, factors):
-		print(factors)
+		# print(factors)
 		total = 0
 		for i in range(0, 12):
 			total += self.weights[i] * factors[i]
@@ -340,6 +340,7 @@ class DecomposedCards:
                 
                                 
 ########## TEST ##########
+"""
 hole_card_list = ['C4', 'DQ']
 community_card_list = ['D4', 'C5', 'CQ', 'CA', 'HK']
 
@@ -370,3 +371,4 @@ print()
 fast = FASTHeuristic([1,1,1,1,1,1,1,1,1,1,1,1])
 
 print("FAST: " + str(fast.getEV(hole_card, community_card)))
+"""

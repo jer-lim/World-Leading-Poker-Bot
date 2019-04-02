@@ -8,7 +8,7 @@ from argparse import ArgumentParser
 
 
 """ =========== *Remember to import your agent!!! =========== """
-from randomplayer import RandomPlayer
+from random_player import RandomPlayer
 from raise_player import RaisedPlayer
 from scaramucci import BootStrapBot
 # from smartwarrior import SmartWarrior
@@ -19,7 +19,7 @@ from scaramucci import BootStrapBot
 $ python testperf.py -n1 "Random Warrior 1" -a1 RandomPlayer -n2 "Random Warrior 2" -a2 RandomPlayer
 """
 
-def testperf(agent_name1, agent1, agent_name2, agent2):		
+def testperf(agent_name1, agent1, agent_name2, agent2):
 
 	# Init to play 500 games of 1000 rounds
 	num_game = 100
