@@ -16,7 +16,7 @@ print("time: " + str(time))
 print(func())
 
 """
-from adversarial_search import AdversarialSeach
+from adversarial_search import AdversarialSearch
 tries = 1
 
-print(timeit.timeit(lambda:AdversarialSeach(hole_card, community_card, 40).decide(["raise", "fold", "call"], [1,1,1]), number=tries)/tries)
+print(timeit.timeit(lambda:AdversarialSearch(hole_card, community_card, 40).decide(["raise", "fold", "call"], [1,1,1]), number=tries)/tries)

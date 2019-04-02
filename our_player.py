@@ -1,6 +1,6 @@
 from pypokerengine.players import BasePokerPlayer
 import random as rand
-from adversarial_search import AdversarialSeach
+from adversarial_search import AdversarialSearch
 import math
 
 from pypokerengine.utils.card_utils import gen_cards
@@ -32,6 +32,7 @@ def MWU(action_weights, factor_to_punish, punish_constant,
 class OurPlayer(BasePokerPlayer):
     def __init__(self):
         self.action_weights = [1, 1.1, 0.9]
+        self.heuristic_weights = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]  # For heuristic function
         self.stack_start_round = 0
         self.last_action = "call"
         self.action_counts = [0,0]
@@ -43,9 +44,9 @@ class OurPlayer(BasePokerPlayer):
         hole_cards = gen_cards(hole_card)
         community_cards = gen_cards(round_state["community_card"])
         pot = round_state["pot"]["main"]["amount"]
-        self.last_action = AdversarialSeach(
-            hole_cards, community_cards,
-            pot).decide([action.get("action") for action in valid_actions],
+        self.last_action = AdversarialSearch(
+            hole_cards, community_cards, pot,
+            self.heuristic_weights).decide([action.get("action") for action in valid_actions],
                         self.action_weights)
         if self.last_action == "call":
             self.action_counts[0] += 1
@@ -91,10 +92,14 @@ class OurPlayer(BasePokerPlayer):
                                           self.stack_start_round - new_stack)
 
 
-        print("Loss: {}, Last action: {}, call - raise: {}".format(
-            (self.stack_start_round - new_stack), self.last_action, self.action_counts[0]-self.action_counts[1]))
-        print(self.action_weights)
+        # print("Loss: {}, Last action: {}, call - raise: {}".format(
+            # (self.stack_start_round - new_stack), self.last_action, self.action_counts[0]-self.action_counts[1]))
+        # print(self.action_weights)
+
+    # Sets the new weights of the Player's actions
+    def set_heuristic_weights(self, index, value):
+        self.heuristic_weights[index] = value
 
 
 def setup_ai():
-    return RandomPlayer()
+    return OurPlayer()

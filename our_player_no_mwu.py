@@ -29,9 +29,10 @@ def MWU(action_weights, factor_to_punish, punish_constant,
     return action_weights
 
 
-class OurPlayerCopy(BasePokerPlayer):
+class OurPlayerNoMwu(BasePokerPlayer):
     def __init__(self):
         self.action_weights = [1, 1, 1]
+        self.heuristic_weights = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]  # For heuristic function
         self.stack_start_round = 0
         self.last_action = "call"
 
@@ -42,7 +43,7 @@ class OurPlayerCopy(BasePokerPlayer):
         hole_cards = gen_cards(hole_card)
         community_cards = gen_cards(round_state["community_card"])
         pot = round_state["pot"]["main"]["amount"]
-        self.last_action = AdversarialSeach(
+        self.last_action = AdversarialSearch(
             hole_cards, community_cards,
             pot).decide([action.get("action") for action in valid_actions],
                         self.action_weights)
@@ -66,6 +67,10 @@ class OurPlayerCopy(BasePokerPlayer):
     def receive_round_result_message(self, winners, hand_info, round_state):
         pass
 
+    # Sets the new weights of the Player's actions
+    def set_heuristic_weights(self, index, value):
+        self.heuristic_weights[index] = value
+
 
 def setup_ai():
-    return OurPlayerCopy()
+    return OurPlayerNoMwu()
