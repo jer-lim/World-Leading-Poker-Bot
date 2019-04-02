@@ -12,8 +12,11 @@ Look at expected value of decision node:
 win_prob * self.pot + (1-win_prob) * (-1) * self.pot
 """
 import abc
+import factors
 from pypokerengine.engine.hand_evaluator import HandEvaluator
+from pypokerengine.utils import card_utils
 from collections import defaultdict
+
 indent = 0
 
 
@@ -27,14 +30,15 @@ from pypokerengine.utils.card_utils import gen_cards, estimate_hole_card_win_rat
 RAISE_TURN_THRESHOLD = 4
 
 
-class AdversarialSeach:
-    def __init__(self, hole_cards, community_cards, pot):
+class AdversarialSearch:
+    def __init__(self, hole_cards, community_cards, pot, heuristic_weights):
         self.hole_cards = hole_cards
         self.community_cards = community_cards
         self.pot = pot
+        self.heuristic_weights = heuristic_weights
 
     def decide(self, actions, weights):
-        node = DecisionNode(0, self.hole_cards, self.community_cards, self.pot,
+        node = DecisionNode(0, self.hole_cards, self.community_cards, self.pot, self.heuristic_weights,
                             len(self.community_cards) == 3)
         return node.getBestAction(actions, weights)
 
@@ -59,6 +63,7 @@ class DecisionNode:
                  hole_cards,
                  community_cards,
                  pot,
+                 heuristic_weights,
                  is_flop,
                  win_prob=None,
                  raise_turn=0,
@@ -78,6 +83,7 @@ class DecisionNode:
         self.turn = turn
         self.opponent = 1 - self.turn
         self.community_cards = community_cards
+        self.heuristic_weights = heuristic_weights
         self.remaining_cards = 5 - len(community_cards)
         self.pot = pot
         self.is_flop = is_flop
@@ -85,11 +91,8 @@ class DecisionNode:
         self.opponent_called = opponent_called
         self.opponent_raised = opponent_raised
         if not win_prob:
-            win_prob = estimate_hole_card_win_rate(
-                nb_simulation=10,
-                nb_player=2,
-                hole_card=self.hole_cards,
-                community_card=self.community_cards)
+            fh = factors.FASTHeuristic(self.heuristic_weights)
+            win_prob = fh.getEV(hole_cards, community_cards)
         self.win_prob = win_prob
 
     def getBestAction(self, actions, weights):
@@ -184,6 +187,7 @@ class DecisionNode:
             self.hole_cards,
             self.community_cards,
             self.pot + increment_val,
+            self.heuristic_weights,
             self.is_flop,
             win_prob=self.win_prob,
             raise_turn=self.raise_turn + 1,
@@ -208,12 +212,13 @@ class DecisionNode:
                 return EndingNode(self.expected_value())
             else:
                 return ChanceNode(self.hole_cards, self.community_cards,
-                                  self.pot, self.is_flop)
+                                  self.pot, self.heuristic_weights, self.is_flop)
         return DecisionNode(
             self.opponent,
             self.hole_cards,
             self.community_cards,
             self.pot,
+            self.heuristic_weights,
             self.is_flop,
             win_prob=self.win_prob,
             opponent_called=True)
@@ -238,10 +243,11 @@ class FoldedNode(TerminalNode):
 
 
 class ChanceNode(TerminalNode):
-    def __init__(self, hole_cards, community_cards, pot, is_flop):
+    def __init__(self, hole_cards, community_cards, pot, heuristic_weights, is_flop):
         self.hole_cards = hole_cards
         self.community_cards = community_cards
         self.pot = pot
+        self.heuristic_weights = heuristic_weights
         self.is_flop = is_flop
 
     def eval(self):
@@ -267,7 +273,7 @@ class ChanceNode(TerminalNode):
             if strength not in memo:
                 memo[strength] = DecisionNode(
                     0, self.hole_cards, self.community_cards + [new_card],
-                    self.pot, self.is_flop).eval()
+                    self.pot, self.heuristic_weights, self.is_flop).eval()
             count[strength] += 1
 
         #Return expected value
