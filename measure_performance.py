@@ -53,7 +53,7 @@ def testperf(agent_name1, agent1, agent_name2, agent2):
         print(results)
         results = results.add(result_hist, fill_value=0)
         print(results)
-
+    results.to_csv("data.csv")
 
 
 
