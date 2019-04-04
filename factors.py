@@ -3,72 +3,78 @@ from pypokerengine.engine.card import Card
 
 # Factors Actively Selectively Taken
 class FASTHeuristic:
-	def __init__(self, weights):
-		# Array of weights
-		# 0 - High Card [highCard]
-		# 1 - Pair Strength [singlePairStrength]
-		# 2 - Higher Pairs [numberOfHigherFormableSinglePairs]
-		# 3 - Outs [numberOfOuts]
-		# 4 - 2-Pair Strength [doublePairStrength]
-		# 5 - Higher 2-Pairs [numberOfFormableDoublePairs]
-		# 6 - Triple Strength [tripleStrength]
-		# 7 - Higher Triple [numberOfHigherFormableTriples]
-		# 8 - Straight Strength [straightStrength]
-		# 9 - Higher Straights [possibleStraights]
-		# 10 - Flush Strength [flushStrength]
-		# 11 - Higher Flushes [possibleFlushes]
-		#    - Full House or Higher [haveFullHouseOrBetter] (Always infinite EV, #yolo)
-		self.weights = weights
+        def __init__(self, weights):
+                # Array of weights
+                # 0 - High Card [highCard]
+                # 1 - Pair Strength [singlePairStrength]
+                # 2 - Higher Pairs [numberOfHigherFormableSinglePairs]
+                # 3 - Outs [numberOfOuts]
+                # 4 - 2-Pair Strength [doublePairStrength]
+                # 5 - Higher 2-Pairs [numberOfFormableDoublePairs]
+                # 6 - Triple Strength [tripleStrength]
+                # 7 - Higher Triple [numberOfHigherFormableTriples]
+                # 8 - Straight Strength [straightStrength]
+                # 9 - Higher Straights [possibleStraights]
+                # 10 - Flush Strength [flushStrength]
+                # 11 - Higher Flushes [possibleFlushes]
+                #    - Full House or Higher [haveFullHouseOrBetter] (Always infinite EV, #yolo)
+                self.weights = weights
+                self.max_values = [13, 13, 5, 15, 13, 10, 13, 5, 13, 12, 13, 2]
+                maximum = 0
+                for i in range(0,12):
+                        maximum += self.max_values[i]*self.weights[i]
+                self.maximum = maximum
+                
 
-	def getEV(self, hole_card, community_card):
-		factors = [0] * 12
+        def getEV(self, hole_card, community_card):
+                factors = [0] * 12
 
-		cards = DecomposedCards(hole_card, community_card)
-		# If have FH or better, #yolo
-		if cards.haveFullHouseOrBetter() > 0:
-			return 9999999
+                cards = DecomposedCards(hole_card, community_card)
+                # If have FH or better, #yolo
+                if cards.haveFullHouseOrBetter() > 0:
+                        return 1
 
-		# Calculate flush [10, 11]
-		factors[10] = cards.flushStrength()
-		factors[11] = -cards.possibleFlushes()
-		if factors[10] > 0:
-			return self.__linearCombination(factors)
+                # Calculate flush [10, 11]
+                factors[10] = cards.flushStrength()
+                factors[11] = -cards.possibleFlushes()
+                if factors[10] > 0:
+                        return self.__linearCombination(factors)
 
-		# Calculate straights
-		factors[8] = cards.straightStrength()
-		factors[9] = -cards.possibleStraights()
-		if factors[8] > 0:
-			return self.__linearCombination(factors)
+                # Calculate straights
+                factors[8] = cards.straightStrength()
+                factors[9] = -cards.possibleStraights()
+                if factors[8] > 0:
+                        return self.__linearCombination(factors)
 
-		# Calculate triples and outs
-		factors[6] = cards.tripleStrength()
-		factors[7] = -cards.numberOfHigherFormableTriples()
-		factors[3] = cards.numberOfOuts()
-		if factors[6] > 0:
-			return self.__linearCombination(factors)
+                # Calculate triples and outs
+                factors[6] = cards.tripleStrength()
+                factors[7] = -cards.numberOfHigherFormableTriples()
+                factors[3] = cards.numberOfOuts()
+                if factors[6] > 0:
+                        return self.__linearCombination(factors)
 
-		# Calculate 2 pairs
-		factors[4] = cards.doublePairStrength()
-		factors[5] = -cards.numberOfHigherFormableDoublePairs()
-		if factors[4] > 0:
-			return self.__linearCombination(factors)
+                # Calculate 2 pairs
+                factors[4] = cards.doublePairStrength()
+                factors[5] = -cards.numberOfHigherFormableDoublePairs()
+                if factors[4] > 0:
+                        return self.__linearCombination(factors)
 
-		# Calculate pairs
-		factors[1] = cards.singlePairStrength()
-		factors[2] = -cards.numberOfHigherFormableSinglePairs()
-		if factors[1] > 0:
-			return self.__linearCombination(factors)
+                # Calculate pairs
+                factors[1] = cards.singlePairStrength()
+                factors[2] = -cards.numberOfHigherFormableSinglePairs()
+                if factors[1] > 0:
+                        return self.__linearCombination(factors)
 
-		# High card
-		factors[0] = cards.highCard()
-		return self.__linearCombination(factors)
+                # High card
+                factors[0] = cards.highCard()
+                return self.__linearCombination(factors)
 
-	def __linearCombination(self, factors):
-		# print(factors)
-		total = 0
-		for i in range(0, 12):
-			total += self.weights[i] * factors[i]
-		return total
+        def __linearCombination(self, factors):
+                # print(factors)
+                total = 0
+                for i in range(0, 12):
+                        total += self.weights[i] * factors[i]
+                return max(0, total/self.maximum)
 
 
 class DecomposedCards:
@@ -208,7 +214,7 @@ class DecomposedCards:
                 for rank in self.num_rank:
                         if self.num_rank[rank] == 2:
                                 num_pairs += 1
-                                pair_strength += rank
+                                pair_strength = rank
                 comm_card_has_pair = False
                 for rank in self.comm_card_num_rank:
                         if self.comm_card_num_rank[rank] == 2:
@@ -340,7 +346,7 @@ class DecomposedCards:
                 
                                 
 ########## TEST ##########
-"""
+
 hole_card_list = ['C4', 'DQ']
 community_card_list = ['D4', 'C5', 'CQ', 'CA', 'HK']
 
@@ -371,4 +377,4 @@ print()
 fast = FASTHeuristic([1,1,1,1,1,1,1,1,1,1,1,1])
 
 print("FAST: " + str(fast.getEV(hole_card, community_card)))
-"""
+
