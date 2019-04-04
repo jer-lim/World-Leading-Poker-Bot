@@ -10,11 +10,12 @@ import time
 from random_player import RandomPlayer
 from scaramucci import BootStrapBot
 from our_player import OurPlayer
+from our_player_no_mwu import OurPlayerNoMwu
 """ ========================================================= """
 
 def start_bot_trainer(num_trials):
     start = time.time()
-    initial_weights = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+    initial_weights = [5, 2, 1, 1, 4, 1, 20, 1, 21, 1, 33, 1]
 
     for i in range(num_trials):
         # 'algorithm' field is irrelevant here, just a placeholder. We specify it under Register Players.
@@ -52,8 +53,8 @@ Method: Trainer uses this method to modify the weights on the bots.
 def train_bots(agent_name1, agent1, agent_name2, agent2, initial_weights):
 
     # Init to play 500 games of 1000 rounds
-    num_game = 1
-    max_round = 10
+    num_game = 10
+    max_round = 100
     initial_stack = 10000
     smallblind_amount = 20
 
@@ -83,7 +84,7 @@ def train_bots(agent_name1, agent1, agent_name2, agent2, initial_weights):
             config = setup_config(max_round=max_round, initial_stack=initial_stack, small_blind_amount=smallblind_amount)
 
             # Register players
-            config.register_player(name=agent_name1, algorithm=OurPlayer())
+            config.register_player(name=agent_name1, algorithm=OurPlayerNoMwu())
             config.register_player(name=agent_name2, algorithm=BootStrapBot())
             # config.register_player(name=agent_name1, algorithm=agent1())
             # config.register_player(name=agent_name2, algorithm=agent2())
@@ -130,7 +131,7 @@ def check_perf(weights, last_net_winnings):
     config = setup_config(max_round=max_round, initial_stack=initial_stack, small_blind_amount=smallblind_amount)
 
     # Register players
-    config.register_player(name="agent_name1", algorithm=OurPlayer())
+    config.register_player(name="agent_name1", algorithm=OurPlayerNoMwu())
     config.register_player(name="agent_name2", algorithm=BootStrapBot())
 
     # Configuring other weights
@@ -151,4 +152,4 @@ def check_perf(weights, last_net_winnings):
     return curr_net_winnings
 
 
-start_bot_trainer(2)
+start_bot_trainer(99999)

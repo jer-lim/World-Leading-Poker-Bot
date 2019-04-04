@@ -347,34 +347,34 @@ class DecomposedCards:
                                 
 ########## TEST ##########
 
-hole_card_list = ['C4', 'DQ']
-community_card_list = ['D4', 'C5', 'CQ', 'CA', 'HK']
+# hole_card_list = ['C4', 'DQ']
+# community_card_list = ['D4', 'C5', 'CQ', 'CA', 'HK']
 
-hole_card = gen_cards(hole_card_list)
-community_card = gen_cards(community_card_list)                                                                
-cards = DecomposedCards(hole_card, community_card)
+# hole_card = gen_cards(hole_card_list)
+# community_card = gen_cards(community_card_list)                                                                
+# cards = DecomposedCards(hole_card, community_card)
 
-print("Hole cards: " + str(hole_card_list))
-print("Community cards: " + str(community_card_list))
-print()
-print("0 highCard: " + str(cards.highCard()))
-print("1 singlePairStrength: " + str(cards.singlePairStrength()))
-print("2 numberOfHigherFormableSinglePairs: " + str(cards.numberOfHigherFormableSinglePairs()))
-print("3 numberOfOuts: " + str(cards.numberOfOuts()))
-print("4 doublePairStrength: " + str(cards.doublePairStrength()))
-print("5 numberOfHigherFormableDoublePairs: " + str(cards.numberOfHigherFormableDoublePairs()))
-print("6 tripleStrength: " + str(cards.tripleStrength()))
-print("7 numberOfHigherFormableTriples: " + str(cards.numberOfHigherFormableTriples()))
-print("8 straightStrength: " + str(cards.straightStrength()))
-print("9 possibleStraights: " + str(cards.possibleStraights()))
-print("10 flushStrength: "+ str(cards.flushStrength()))
-print("11 possibleFlushes: "+ str(cards.possibleFlushes()))
-print("haveStraightFlush: " + str(cards.haveStraightFlush()))
-print("haveFullHouse: " + str(cards.haveFullHouse()))
-print("INF haveFullHouseOrBetter: " + str(cards.haveFullHouseOrBetter()))
-print()
+# print("Hole cards: " + str(hole_card_list))
+# print("Community cards: " + str(community_card_list))
+# print()
+# print("0 highCard: " + str(cards.highCard()))
+# print("1 singlePairStrength: " + str(cards.singlePairStrength()))
+# print("2 numberOfHigherFormableSinglePairs: " + str(cards.numberOfHigherFormableSinglePairs()))
+# print("3 numberOfOuts: " + str(cards.numberOfOuts()))
+# print("4 doublePairStrength: " + str(cards.doublePairStrength()))
+# print("5 numberOfHigherFormableDoublePairs: " + str(cards.numberOfHigherFormableDoublePairs()))
+# print("6 tripleStrength: " + str(cards.tripleStrength()))
+# print("7 numberOfHigherFormableTriples: " + str(cards.numberOfHigherFormableTriples()))
+# print("8 straightStrength: " + str(cards.straightStrength()))
+# print("9 possibleStraights: " + str(cards.possibleStraights()))
+# print("10 flushStrength: "+ str(cards.flushStrength()))
+# print("11 possibleFlushes: "+ str(cards.possibleFlushes()))
+# print("haveStraightFlush: " + str(cards.haveStraightFlush()))
+# print("haveFullHouse: " + str(cards.haveFullHouse()))
+# print("INF haveFullHouseOrBetter: " + str(cards.haveFullHouseOrBetter()))
+# print()
 
-fast = FASTHeuristic([1,1,1,1,1,1,1,1,1,1,1,1])
+# fast = FASTHeuristic([1,1,1,1,1,1,1,1,1,1,1,1])
 
-print("FAST: " + str(fast.getEV(hole_card, community_card)))
+# print("FAST: " + str(fast.getEV(hole_card, community_card)))
 
