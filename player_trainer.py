@@ -19,11 +19,11 @@ def start_bot_trainer(num_trials):
     for i in range(num_trials):
         # 'algorithm' field is irrelevant here, just a placeholder. We specify it under Register Players.
         initial_weights = train_bots('agent1', RandomPlayer(), 'agent2', RandomPlayer(), initial_weights)
-        print(f"Iteration %d complete: Weights are now: %s\n" % (i, str(initial_weights)))
+        print("Iteration %d complete: Weights are now: %s\n" % (i, str(initial_weights)))
 
     end = time.time()
     print("\nTime taken to train: %.4f seconds" % (end-start))
-    print(f"Final Weights: %s" % str(initial_weights))
+    print("Final Weights: %s" % str(initial_weights))
 
 
 """
@@ -146,7 +146,7 @@ def check_perf(weights, last_net_winnings):
     performance_gain = 0
     if not last_net_winnings == 0:
         performance_gain = curr_net_winnings - last_net_winnings / float(last_net_winnings)
-    print(f"Performance changed by %d" % (performance_gain * 100))
+    print("Performance changed by %d percent" % (performance_gain * 100))
 
     return curr_net_winnings
 
