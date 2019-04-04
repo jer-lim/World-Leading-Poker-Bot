@@ -63,14 +63,16 @@ def train_bots(agent_name1, agent1, agent_name2, agent2, initial_weights):
     weight_count = len(initial_weights)
     partition_interval_number = 100
     last_net_winnings = 0
+    offset = 0  # Use this to adjust which weight starts being trained first. E.g. offset = 6 implies w6 trained first.
 
     # Partitioning step to get the weights to be tested
     for p in range(0, partition_interval_number + 1):
         trial_weights.append(p * float(1) / partition_interval_number)
 
     for i in range(weight_count):
-        print("Testing weight %d ..." % (i))
-        print("Current w%d is now: %d" % (i, initial_weights[i]))
+        updated_index = (i + offset) % weight_count
+        print("Testing weight %d ..." % (updated_index))
+        print("Current w%d is now: %d" % (updated_index, initial_weights[updated_index]))
         print("Current weights are now %s" % (str(initial_weights)))
 
         current_best = (float("-inf"), 0)
@@ -93,7 +95,7 @@ def train_bots(agent_name1, agent1, agent_name2, agent2, initial_weights):
             config.players_info[0]['algorithm'].w = initial_weights
 
             # Set trainedplayer weights
-            config.players_info[0]['algorithm'].w[i] = weight
+            config.players_info[0]['algorithm'].w[updated_index] = weight
 
             # Start playing num_game games
             for game in range(1, num_game + 1):
@@ -103,9 +105,9 @@ def train_bots(agent_name1, agent1, agent_name2, agent2, initial_weights):
 
             if agent1_pot - agent2_pot > current_best[0]:
                 current_best = (agent1_pot - agent2_pot, weight)
-                print("Current best w%d is now: %s" % (i, str(current_best)))
+                print("Current best w%d is now: %s" % (updated_index, str(current_best)))
 
-        initial_weights[i] = current_best[1]
+        initial_weights[updated_index] = current_best[1]
 
     last_net_winnings = check_perf(initial_weights, last_net_winnings)
     return initial_weights
