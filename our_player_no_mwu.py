@@ -45,7 +45,7 @@ class OurPlayerNoMwu(BasePokerPlayer):
         pot = round_state["pot"]["main"]["amount"]
         self.last_action = AdversarialSearch(
             hole_cards, community_cards,
-            pot).decide([action.get("action") for action in valid_actions],
+            pot, self.heuristic_weights).decide([action.get("action") for action in valid_actions],
                         self.action_weights)
         return self.last_action
 
