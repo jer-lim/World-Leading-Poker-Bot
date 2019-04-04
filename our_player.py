@@ -54,7 +54,7 @@ class OurPlayer(BasePokerPlayer):
         return self.last_action
 
     def receive_game_start_message(self, game_info):
-        self.action_weights = [1,1,1]
+        self.action_weights = [1,1.1,0.9]
         return
 
 
