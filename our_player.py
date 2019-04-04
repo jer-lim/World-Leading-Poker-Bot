@@ -5,7 +5,7 @@ import math
 
 from pypokerengine.utils.card_utils import gen_cards
 
-
+LEARNING_RATE = 0.000001
 def MWU(action_weights, factor_to_punish, punish_constant,
         loss):  #factor_to_punish should be the previous move made
     punish_rate = math.exp(-punish_constant * loss)
@@ -31,7 +31,7 @@ def MWU(action_weights, factor_to_punish, punish_constant,
 
 class OurPlayer(BasePokerPlayer):
     def __init__(self):
-        self.action_weights = [1, 1.1, 0.9]
+        self.action_weights = [1, 1, 1]
         self.heuristic_weights = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]  # For heuristic function
         self.stack_start_round = 0
         self.last_action = "call"
@@ -79,16 +79,16 @@ class OurPlayer(BasePokerPlayer):
                    round_state["seats"]))[0]["stack"]
         to_penalize = self.last_action
         if to_penalize == "fold":
-            self.action_weights = MWU(self.action_weights, self.last_action, 0.000001,
+            self.action_weights = MWU(self.action_weights, self.last_action, LEARNING_RATE,
                                       self.stack_start_round - new_stack)
         else:
             if self.action_counts[0] > self.action_counts[1]:
-                self.action_weights = MWU(self.action_weights, "call", 0.000001,
+                self.action_weights = MWU(self.action_weights, "call", LEARNING_RATE,
                                           self.stack_start_round - new_stack)
-                self.action_weights = MWU(self.action_weights, "raise", 0.000001,
+                self.action_weights = MWU(self.action_weights, "raise", LEARNING_RATE,
                                         self.stack_start_round - new_stack)
             else:
-                self.action_weights = MWU(self.action_weights, "raise", 0.000001,
+                self.action_weights = MWU(self.action_weights, "raise", LEARNING_RATE,
                                           self.stack_start_round - new_stack)
 
 
