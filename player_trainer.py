@@ -15,7 +15,7 @@ from our_player_no_mwu import OurPlayerNoMwu
 
 def start_bot_trainer(num_trials):
     start = time.time()
-    initial_weights = [5, 2, 1, 1, 4, 1, 20, 1, 21, 1, 33, 1]
+    initial_weights = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 
     for i in range(num_trials):
         # 'algorithm' field is irrelevant here, just a placeholder. We specify it under Register Players.
