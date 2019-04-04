@@ -19,11 +19,11 @@ def start_bot_trainer(num_trials):
     for i in range(num_trials):
         # 'algorithm' field is irrelevant here, just a placeholder. We specify it under Register Players.
         initial_weights = train_bots('agent1', RandomPlayer(), 'agent2', RandomPlayer(), initial_weights)
-        print(f"Iteration {i} complete: Weights are now: {initial_weights}\n")
+        print("Iteration %d complete: Weights are now: %s\n" % (i, str(initial_weights)))
 
     end = time.time()
-    print("\nTime taken to train: %.4f seconds" %(end-start))
-    print(f"Final Weights: {initial_weights}")
+    print("\nTime taken to train: %.4f seconds" % (end-start))
+    print("Final Weights: %s" % str(initial_weights))
 
 
 """
@@ -68,9 +68,9 @@ def train_bots(agent_name1, agent1, agent_name2, agent2, initial_weights):
         trial_weights.append(p * float(1) / partition_interval_number)
 
     for i in range(weight_count):
-        print(f"Testing weight {i} ...")
-        print(f"Current w{i} is now: {initial_weights[i]}")
-        print(f"Current weights are now {initial_weights}")
+        print("Testing weight %d ..." % (i))
+        print("Current w%d is now: %d" % (i, initial_weights[i]))
+        print("Current weights are now %s" % (str(initial_weights)))
 
         current_best = (float("-inf"), 0)
 
@@ -102,7 +102,7 @@ def train_bots(agent_name1, agent1, agent_name2, agent2, initial_weights):
 
             if agent1_pot - agent2_pot > current_best[0]:
                 current_best = (agent1_pot - agent2_pot, weight)
-                print(f"Current best w{i} is now: {current_best}")
+                print("Current best w%d is now: %s" % (i, str(current_best)))
 
         initial_weights[i] = current_best[1]
 
@@ -146,7 +146,7 @@ def check_perf(weights, last_net_winnings):
     performance_gain = 0
     if not last_net_winnings == 0:
         performance_gain = curr_net_winnings - last_net_winnings / float(last_net_winnings)
-    print(f"Performance changed by {performance_gain * 100}%")
+    print("Performance changed by %d percent" % (performance_gain * 100))
 
     return curr_net_winnings
 
