@@ -38,7 +38,8 @@ class AdversarialSearch:
         self.heuristic_weights = heuristic_weights
 
     def decide(self, actions, weights):
-        node = DecisionNode(0, self.hole_cards, self.community_cards, self.pot, self.heuristic_weights,
+        node = DecisionNode(0, self.hole_cards, self.community_cards, self.pot,
+                            self.heuristic_weights,
                             len(self.community_cards) == 3)
         return node.getBestAction(actions, weights)
 
@@ -122,7 +123,8 @@ class DecisionNode:
         min_value = min(results.values())
         for key, val in results.items():
             if min_value < 0:
-                results[key] = (val - 2 * min_value) * weights[corresponding_vals[label]]
+                results[key] = (
+                    val - 2 * min_value) * weights[corresponding_vals[label]]
             else:
                 results[key] = val * weights[corresponding_vals[label]]
         return max(results, key=results.get)
@@ -217,7 +219,8 @@ class DecisionNode:
                 return EndingNode(self.expected_value())
             else:
                 return ChanceNode(self.hole_cards, self.community_cards,
-                                  self.pot, self.heuristic_weights, self.is_flop)
+                                  self.pot, self.heuristic_weights,
+                                  self.is_flop)
         return DecisionNode(
             self.opponent,
             self.hole_cards,
@@ -248,7 +251,8 @@ class FoldedNode(TerminalNode):
 
 
 class ChanceNode(TerminalNode):
-    def __init__(self, hole_cards, community_cards, pot, heuristic_weights, is_flop):
+    def __init__(self, hole_cards, community_cards, pot, heuristic_weights,
+                 is_flop):
         self.hole_cards = hole_cards
         self.community_cards = community_cards
         self.pot = pot
