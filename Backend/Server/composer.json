@@ -1,0 +1,29 @@
+{
+	"name": "keythkatz/barrens",
+	"description": "Simple Lightweight Routing PHP Framework.",
+	"type": "project",
+	"keywords": ["framework"],
+	"homepage": "https://github.com/keythkatz/barrens",
+	"license": "MIT",
+	"authors": [
+		{
+			"name": "Jeremy Lim",
+			"email": "me@jerl.im",
+			"homepage": "https://jerl.im",
+			"role": "Developer"
+		}
+	],
+	"require": {
+		"php": "^7.1",
+		"illuminate/database": "^5.8"
+	},
+	"require-dev": {
+		
+	},
+	"autoload": {
+		"psr-4": {
+			"KeythKatz\\Barrens\\": "core/",
+			"": "src/"
+		}
+	}
+}
