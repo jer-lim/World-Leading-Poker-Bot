@@ -6,7 +6,7 @@ start_poker = game.start_poker
 import multiprocessing
 from multiprocessing import Process, Queue
 
-from httplib import HTTPConnection
+from httplib import HTTPSConnection
 import json
 import copy
 
@@ -17,10 +17,10 @@ from our_player import OurPlayer
 from our_player_no_mwu import OurPlayerNoMwu
 """ ========================================================= """
 
-host = "trainserver.test"
+host = "therake.is-under.dev"
 
-min_game = 1
-max_round = 10
+min_game = 10
+max_round = 100
 initial_stack = 10000
 smallblind_amount = 20
 config = setup_config(max_round=max_round, initial_stack=initial_stack, small_blind_amount=smallblind_amount)
@@ -41,15 +41,16 @@ def main():
 			current_iteration = test['iteration']
 			current_weight = test['weight']
 		performance = do_test(weights, test)
+		print(performance)
 		test['result'] = performance
 		test_count += 1
 		if test_count % 100 == 0:
-			print str(test_count) + " bitcoins mined so far."
+			print(str(test_count) + " bitcoins mined so far.")
 		test = post_result(test)
 
 
 def get_weights():
-	conn = HTTPConnection(host, 80)
+	conn = HTTPSConnection(host)
 	conn.request("GET", "/weights");
 	response = conn.getresponse()
 	weights = json.loads(response.read(9999))
@@ -58,21 +59,21 @@ def get_weights():
 	return weights
 
 def get_test():
-	conn = HTTPConnection(host, 80)
+	conn = HTTPSConnection(host)
 	conn.request("GET", "/test");
 	response = conn.getresponse()
 	test = json.loads(response.read(9999))
 	conn.close()
-	print("Test iteration " + str(test['iteration']) + " w" + str(test['weight']) + " value " + str(test['testValue']))
+	print("Test iteration " + str(test['iteration']) + " w" + str(test['weight']) + " value " + str(test['testValue']) + ": ")
 	return test
 
 def post_result(result):
-	conn = HTTPConnection(host, 80)
+	conn = HTTPSConnection(host)
 	conn.request("POST", "/submit", json.dumps(result))
 	response = conn.getresponse()
 	test = json.loads(response.read(9999))
 	conn.close()
-	print("Test iteration " + str(test['iteration']) + " w" + str(test['weight']) + " value " + str(test['testValue']))
+	sys.stdout.write("Test iteration " + str(test['iteration']) + " w" + str(test['weight']) + " value " + str(test['testValue']) + ": ")
 	return test
 
 def do_test(weights, test):
