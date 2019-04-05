@@ -4,6 +4,8 @@ import game
 setup_config = game.setup_config
 start_poker = game.start_poker
 import time
+import multiprocessing
+from multiprocessing import Process, Queue
 
 
 """ =========== *Remember to import your agent!!! =========== """
@@ -15,7 +17,7 @@ from our_player_no_mwu import OurPlayerNoMwu
 
 def start_bot_trainer(num_trials):
     start = time.time()
-    initial_weights = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+    initial_weights = [0.9, 0.71, 0.77, 0.39, 0.13, 0.01, 0.02, 0.01, 0.021, 0.01, 0.033, 0.01]
 
     for i in range(num_trials):
         # 'algorithm' field is irrelevant here, just a placeholder. We specify it under Register Players.
@@ -63,7 +65,7 @@ def train_bots(agent_name1, agent1, agent_name2, agent2, initial_weights):
     weight_count = len(initial_weights)
     partition_interval_number = 100
     last_net_winnings = 0
-    offset = 0  # Use this to adjust which weight starts being trained first. E.g. offset = 6 implies w6 trained first.
+    offset = 5  # Use this to adjust which weight starts being trained first. E.g. offset = 6 implies w6 trained first.
 
     # Partitioning step to get the weights to be tested
     for p in range(0, partition_interval_number + 1):
@@ -98,10 +100,33 @@ def train_bots(agent_name1, agent1, agent_name2, agent2, initial_weights):
             config.players_info[0]['algorithm'].w[updated_index] = weight
 
             # Start playing num_game games
+
+            # init count of games and threads
+            game_queue = Queue()
             for game in range(1, num_game + 1):
-                game_result = start_poker(config, verbose=0)
-                agent1_pot = agent1_pot + game_result[0]['players'][0]['stack']
-                agent2_pot = agent2_pot + game_result[0]['players'][1]['stack']
+                game_queue.put(game)
+            return_queue = Queue()
+            num_threads = multiprocessing.cpu_count() - 1
+            while not game_queue.empty():
+                # start a thread for each remaining game up to threadcount limit
+                threads = []
+                game_runners = []
+                for i in range(0, num_threads):
+                    if not game_queue.empty():
+                        game = game_queue.get()
+                        game_runners += [GameRunner(config, return_queue)]
+                        threads += [Process(target = game_runners[i].start_game)]
+                        threads[i].start()
+
+                # join all threads
+                for i in range(0, len(threads)):
+                    threads[i].join()
+
+                # process returned data
+                while not return_queue.empty():
+                    result = return_queue.get()
+                    agent1_pot = agent1_pot + result[0]
+                    agent2_pot = agent2_pot + result[1]
 
             if agent1_pot - agent2_pot > current_best[0]:
                 current_best = (agent1_pot - agent2_pot, weight)
@@ -112,6 +137,15 @@ def train_bots(agent_name1, agent1, agent_name2, agent2, initial_weights):
     last_net_winnings = check_perf(initial_weights, last_net_winnings)
     return initial_weights
 
+class GameRunner(object):
+    def __init__(self, config, return_queue):
+        self.config = config
+        self.return_queue = return_queue
+
+    def start_game(self):
+        game_result = start_poker(self.config, verbose=0)
+        result = (game_result[0]['players'][0]['stack'], game_result[0]['players'][1]['stack'])
+        self.return_queue.put(result)
 
 """
 Method used to check increase in performance after each iteration of weights
