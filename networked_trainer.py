@@ -23,10 +23,6 @@ min_game = 10
 max_round = 100
 initial_stack = 10000
 smallblind_amount = 20
-config = setup_config(max_round=max_round, initial_stack=initial_stack, small_blind_amount=smallblind_amount)
-# Register players
-config.register_player(name="agent1", algorithm=OurPlayerNoMwu())
-config.register_player(name="agent2", algorithm=BootStrapBot())
 
 
 def main():
@@ -82,6 +78,11 @@ def do_test(weights, test):
 	weight = test['weight']
 	value = test['testValue']
 	weights[weight] = value
+
+	config = setup_config(max_round=max_round, initial_stack=initial_stack, small_blind_amount=smallblind_amount)
+	# Register players
+	config.register_player(name="agent1", algorithm=OurPlayerNoMwu())
+	config.register_player(name="agent2", algorithm=BootStrapBot())
 
 	# Configuring other weights
 	config.players_info[0]['algorithm'].w = weights
