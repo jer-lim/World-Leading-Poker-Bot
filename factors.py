@@ -19,7 +19,8 @@ class FASTHeuristic:
                 # 11 - Higher Flushes [possibleFlushes]
                 #    - Full House or Higher [haveFullHouseOrBetter] (Always infinite EV, #yolo)
                 self.weights = weights
-                self.max_values = [13, 13, 5, 15, 13, 10, 13, 5, 13, 12, 13, 2]
+                # self.max_values = [13, 13, 5, 15, 13, 10, 13, 5, 13, 12, 13, 2]
+                self.max_values = [13, 13, 0, 15, 13, 0, 13, 0, 13, 0, 13, 0]
                 maximum = 0
                 for i in range(0,12):
                         maximum += self.max_values[i]*self.weights[i]
