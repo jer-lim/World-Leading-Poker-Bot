@@ -37,7 +37,7 @@ def main():
 			current_iteration = test['iteration']
 			current_weight = test['weight']
 			min_game = test['minGames']
-		performance = do_test(weights, test, min_game)
+		performance = do_test(weights, test, min_game, current_iteration, current_weight)
 		print(performance)
 		test['result'] = performance
 		test['tester'] = socket.gethostname()
@@ -74,10 +74,18 @@ def post_result(result):
 	print_test(test)
 	return test
 
+def get_status():
+	conn = HTTPSConnection(host)
+	conn.request("GET", "/status");
+	response = conn.getresponse()
+	status = json.loads(response.read(9999))
+	conn.close()
+	return status
+
 def print_test(test):
 	sys.stdout.write("Test iteration " + str(test['iteration']) + " w" + str(test['weight']) + " value " + str(test['testValue']) + " (" + str(test['minGames']) + " games): ")
 
-def do_test(weights, test, min_game):
+def do_test(weights, test, min_game, current_iteration, current_weight):
 
 	weights = copy.deepcopy(weights)
 	weight = test['weight']
@@ -100,7 +108,7 @@ def do_test(weights, test, min_game):
 	return_queue = Queue()
 	num_threads = multiprocessing.cpu_count() - 1
 	games = min_game + num_threads - (min_game % num_threads)
-	num_games_ran = games
+	num_games_ran = 0
 	while games > 0:
 		# start a thread for each remaining game up to threadcount limit
 		threads = []
@@ -108,6 +116,7 @@ def do_test(weights, test, min_game):
 		for i in range(0, num_threads):
 			if games > 0:
 				games -= 1
+				num_games_ran += 1
 				game_runners += [GameRunner(config, return_queue)]
 				threads += [Process(target = game_runners[i].start_game)]
 				threads[i].start()
@@ -121,6 +130,11 @@ def do_test(weights, test, min_game):
 			result = return_queue.get()
 			agent1_pot = agent1_pot + result[0]
 			agent2_pot = agent2_pot + result[1]
+
+		status = get_status()
+		if status['iteration'] != current_iteration or status['weight'] != current_weight:
+			print("Current iteration/weight changed. Stopping current training.")
+			break;
 
 	performance = (agent1_pot - agent2_pot) / num_games_ran
 	return performance
