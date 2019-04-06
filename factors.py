@@ -35,6 +35,14 @@ class FASTHeuristic:
                 if cards.haveFullHouseOrBetter() > 0:
                         return 1
 
+                # Preset strengths to make strong hands stronger than weaker hands
+                factors[8] = self.max_values[8]
+                factors[6] = self.max_values[6]
+                factors[4] = self.max_values[4]
+                factors[3] = self.max_values[3]
+                factors[1] = self.max_values[1]
+                factors[0] = self.max_values[0]
+
                 # Calculate flush [10, 11]
                 factors[10] = cards.flushStrength()
                 factors[11] = -cards.possibleFlushes()
