@@ -9,6 +9,7 @@ from multiprocessing import Process, Queue
 from httplib import HTTPSConnection
 import json
 import copy
+import socket
 
 """ =========== *Remember to import your agent!!! =========== """
 from random_player import RandomPlayer
@@ -39,6 +40,7 @@ def main():
 		performance = do_test(weights, test, min_game)
 		print(performance)
 		test['result'] = performance
+		test['tester'] = socket.gethostname()
 		test_count += 1
 		if test_count % 100 == 0:
 			print(str(test_count) + " bitcoins mined so far.")
