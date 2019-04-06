@@ -47,6 +47,8 @@ def main():
 				if test_count % 100 == 0:
 					print(str(test_count) + " bitcoins mined so far.")
 				test = post_result(test)
+		except (KeyboardInterrupt, SystemExit):
+			raise
 		except:
 			print("Some error occurred, restarting training.")
 		
