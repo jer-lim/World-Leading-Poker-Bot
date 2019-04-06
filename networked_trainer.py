@@ -27,24 +27,29 @@ smallblind_amount = 20
 
 def main():
 	
-	current_iteration = -1
-	current_weight = -1
-	test = get_test()
-	test_count = 0
 	while True:
-		if test['iteration'] > current_iteration or test['weight'] > current_weight:
-			weights = get_weights()
-			current_iteration = test['iteration']
-			current_weight = test['weight']
-			min_game = test['minGames']
-		performance = do_test(weights, test, min_game, current_iteration, current_weight)
-		print(performance)
-		test['result'] = performance
-		test['tester'] = socket.gethostname()
-		test_count += 1
-		if test_count % 100 == 0:
-			print(str(test_count) + " bitcoins mined so far.")
-		test = post_result(test)
+		try:
+			current_iteration = -1
+			current_weight = -1
+			test = get_test()
+			test_count = 0
+			while True:
+				if test['iteration'] > current_iteration or test['weight'] > current_weight:
+					weights = get_weights()
+					current_iteration = test['iteration']
+					current_weight = test['weight']
+					min_game = test['minGames']
+				performance = do_test(weights, test, min_game, current_iteration, current_weight)
+				print(performance)
+				test['result'] = performance
+				test['tester'] = socket.gethostname()
+				test_count += 1
+				if test_count % 100 == 0:
+					print(str(test_count) + " bitcoins mined so far.")
+				test = post_result(test)
+		except:
+			print("Some error occurred, restarting training.")
+		
 
 
 def get_weights():
