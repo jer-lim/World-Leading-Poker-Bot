@@ -19,7 +19,6 @@ from our_player_no_mwu import OurPlayerNoMwu
 
 host = "therake.is-under.dev"
 
-min_game = 10
 max_round = 100
 initial_stack = 10000
 smallblind_amount = 20
@@ -36,7 +35,8 @@ def main():
 			weights = get_weights()
 			current_iteration = test['iteration']
 			current_weight = test['weight']
-		performance = do_test(weights, test)
+			min_game = test['minGames']
+		performance = do_test(weights, test, min_game)
 		print(performance)
 		test['result'] = performance
 		test_count += 1
@@ -60,7 +60,7 @@ def get_test():
 	response = conn.getresponse()
 	test = json.loads(response.read(9999))
 	conn.close()
-	print("Test iteration " + str(test['iteration']) + " w" + str(test['weight']) + " value " + str(test['testValue']) + ": ")
+	print_test(test)
 	return test
 
 def post_result(result):
@@ -69,10 +69,13 @@ def post_result(result):
 	response = conn.getresponse()
 	test = json.loads(response.read(9999))
 	conn.close()
-	sys.stdout.write("Test iteration " + str(test['iteration']) + " w" + str(test['weight']) + " value " + str(test['testValue']) + ": ")
+	print_test(test)
 	return test
 
-def do_test(weights, test):
+def print_test(test):
+	sys.stdout.write("Test iteration " + str(test['iteration']) + " w" + str(test['weight']) + " value " + str(test['testValue']) + " (" + str(test['minGames']) + " games): ")
+
+def do_test(weights, test, min_game):
 
 	weights = copy.deepcopy(weights)
 	weight = test['weight']
