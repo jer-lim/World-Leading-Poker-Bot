@@ -98,6 +98,7 @@ def do_test(weights, test, min_game):
 	return_queue = Queue()
 	num_threads = multiprocessing.cpu_count() - 1
 	games = min_game + num_threads - (min_game % num_threads)
+	num_games_ran = games
 	while games > 0:
 		# start a thread for each remaining game up to threadcount limit
 		threads = []
@@ -119,7 +120,7 @@ def do_test(weights, test, min_game):
 			agent1_pot = agent1_pot + result[0]
 			agent2_pot = agent2_pot + result[1]
 
-	performance = agent1_pot - agent2_pot
+	performance = (agent1_pot - agent2_pot) / num_games_ran
 	return performance
 
 class GameRunner(object):
