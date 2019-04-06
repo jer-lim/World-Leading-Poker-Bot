@@ -25,3 +25,4 @@ Route::get("/weights", "\Controller\TrainerController", "getWeights");
 Route::get("/test", "\Controller\TrainerController", "getTrainingSet");
 Route::cli("/test", "\Controller\TrainerController", "getTrainingSet");
 Route::post("/submit", "\Controller\TrainerController", "submitTestResult");
+Route::get("/status", "\Controller\TrainerController", "getStatus");

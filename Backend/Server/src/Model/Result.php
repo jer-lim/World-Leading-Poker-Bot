@@ -35,6 +35,16 @@ class Result extends \Illuminate\Database\Eloquent\Model
             ->get();
     }
 
+    public static function getIncompleteTest(int $iteration, int $weight)
+    {
+        return self::where("iteration", $iteration)
+            ->where("weight", $weight)
+            ->where("result", null)
+            ->orderBy("last_assigned", "ASC")
+            ->orderBy("test_value", "ASC")
+            ->first();
+    }
+
     public static function getBestResult(int $iteration, int $weight)
     {
         return self::where("iteration", $iteration)
@@ -44,15 +54,16 @@ class Result extends \Illuminate\Database\Eloquent\Model
             ->first();
     }
 
-    public static function createNew(int $iteration, int $weight, int $intervals)
+    public static function createNew(int $iteration, int $weight, int $intervals, int $minGames)
     {
         $interval = 1 / $intervals;
-        for ($i = 0; $i < $intervals; ++$i) {
+        for ($i = 0; $i < $intervals + 1; ++$i) {
             $value = $i * $interval;
             $r = new self();
             $r->iteration = $iteration;
             $r->weight = $weight;
             $r->test_value = $value;
+            $r->min_games = $minGames;
             $r->save();
         }
     }
@@ -65,9 +76,16 @@ class Result extends \Illuminate\Database\Eloquent\Model
             ->first();
     }
 
-    public function setResult(int $result)
+    public function setResult(int $result, $tester)
     {
         $this->result = $result;
+        $this->tester = $tester;
+        $this->save();
+    }
+
+    public function setAssigned()
+    {
+        $this->last_assigned = date("Y-m-d H:i:s");
         $this->save();
     }
 }
