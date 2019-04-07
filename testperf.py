@@ -11,6 +11,8 @@ from argparse import ArgumentParser
 from random_player import RandomPlayer
 from raise_player import RaisedPlayer
 from scaramucci import BootStrapBot
+from our_player_no_mwu import OurPlayerNoMwu
+from hand_strength import HandStrengthBot
 # from smartwarrior import SmartWarrior
 """ ========================================================= """
 
@@ -22,8 +24,8 @@ $ python testperf.py -n1 "Random Warrior 1" -a1 RandomPlayer -n2 "Random Warrior
 def testperf(agent_name1, agent1, agent_name2, agent2):
 
 	# Init to play 500 games of 1000 rounds
-	num_game = 100
-	max_round = 1000
+	num_game = 10
+	max_round = 100
 	initial_stack = 10000
 	smallblind_amount = 20
 
@@ -35,8 +37,8 @@ def testperf(agent_name1, agent1, agent_name2, agent2):
 	config = setup_config(max_round=max_round, initial_stack=initial_stack, small_blind_amount=smallblind_amount)
 	
 	# Register players
-	config.register_player(name=agent_name1, algorithm=RaisedPlayer())
-	config.register_player(name=agent_name2, algorithm=BootStrapBot())
+	config.register_player(name=agent_name1, algorithm=OurPlayerNoMwu())
+	config.register_player(name=agent_name2, algorithm=HandStrengthBot())
 	# config.register_player(name=agent_name1, algorithm=agent1())
 	# config.register_player(name=agent_name2, algorithm=agent2())
 	
@@ -45,8 +47,9 @@ def testperf(agent_name1, agent1, agent_name2, agent2):
 	for game in range(1, num_game+1):
 		print("Game number: ", game)
 		game_result = start_poker(config, verbose=0)
-		agent1_pot = agent1_pot + game_result['players'][0]['stack']
-		agent2_pot = agent2_pot + game_result['players'][1]['stack']
+		agent1_pot = agent1_pot + game_result[0]['players'][0]['stack']
+		agent2_pot = agent2_pot + game_result[0]['players'][1]['stack']
+		print(str(game_result[0]['players'][0]['stack']) + " vs " + str(game_result[0]['players'][1]['stack']))
 
 	print("\n After playing {} games of {} rounds, the results are: ".format(num_game, max_round))
 	# print("\n Agent 1's final pot: ", agent1_pot)

@@ -16,6 +16,7 @@ from random_player import RandomPlayer
 from scaramucci import BootStrapBot
 from our_player import OurPlayer
 from our_player_no_mwu import OurPlayerNoMwu
+from hand_strength import HandStrengthBot
 """ ========================================================= """
 
 host = "therake.is-under.dev"
@@ -102,7 +103,7 @@ def do_test(weights, test, min_game, current_iteration, current_weight):
 	config = setup_config(max_round=max_round, initial_stack=initial_stack, small_blind_amount=smallblind_amount)
 	# Register players
 	config.register_player(name="agent1", algorithm=OurPlayerNoMwu())
-	config.register_player(name="agent2", algorithm=BootStrapBot())
+	config.register_player(name="agent2", algorithm=HandStrengthBot())
 
 	# Configuring other weights
 	config.players_info[0]['algorithm'].w = weights
