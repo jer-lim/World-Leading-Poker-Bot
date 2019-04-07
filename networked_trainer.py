@@ -99,14 +99,6 @@ def do_test(weights, test, min_game, current_iteration, current_weight):
 	value = test['testValue']
 	weights[weight] = value
 
-	config = setup_config(max_round=max_round, initial_stack=initial_stack, small_blind_amount=smallblind_amount)
-	# Register players
-	config.register_player(name="agent1", algorithm=OurPlayerNoMwu())
-	config.register_player(name="agent2", algorithm=BootStrapBot())
-
-	# Configuring other weights
-	config.players_info[0]['algorithm'].w = weights
-
 	# Start playing num_game games
 	agent1_pot = 0
 	agent2_pot = 0
@@ -124,7 +116,7 @@ def do_test(weights, test, min_game, current_iteration, current_weight):
 			if games > 0:
 				games -= 1
 				num_games_ran += 1
-				game_runners += [GameRunner(config, return_queue)]
+				game_runners += [GameRunner(weights, return_queue)]
 				threads += [Process(target = game_runners[i].start_game)]
 				threads[i].start()
 
@@ -147,13 +139,21 @@ def do_test(weights, test, min_game, current_iteration, current_weight):
 	return performance
 
 class GameRunner(object):
-    def __init__(self, config, return_queue):
-        self.config = config
-        self.return_queue = return_queue
+	def __init__(self, weights, return_queue):
 
-    def start_game(self):
-        game_result = start_poker(self.config, verbose=0)
-        result = (game_result[0]['players'][0]['stack'], game_result[0]['players'][1]['stack'])
-        self.return_queue.put(result)
+		self.config = setup_config(max_round=max_round, initial_stack=initial_stack, small_blind_amount=smallblind_amount)
+		# Register players
+		self.config.register_player(name="agent1", algorithm=OurPlayerNoMwu())
+		self.config.register_player(name="agent2", algorithm=BootStrapBot())
+
+		# Configuring other weights
+		self.config.players_info[0]['algorithm'].w = weights
+
+		self.return_queue = return_queue
+
+	def start_game(self):
+		game_result = start_poker(self.config, verbose=0)
+		result = (game_result[0]['players'][0]['stack'], game_result[0]['players'][1]['stack'])
+		self.return_queue.put(result)
 
 main()
