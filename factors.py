@@ -11,7 +11,7 @@ class FASTHeuristic:
                 # 3 - 2-Pair Strength [doublePairStrength]
                 #   - Triple or Higher [haveTripleOrBetter] (Always infinite EV, #yolo)
                 self.weights = weights
-                self.max_values = [13, 13, 0, 15]
+                self.max_values = [13, 13, 0, 13]
                 maximum = 0
                 for i in range(0,4):
                         maximum += self.max_values[i]*self.weights[i]
