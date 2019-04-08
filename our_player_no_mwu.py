@@ -33,10 +33,10 @@ def MWU(action_weights, factor_to_punish, punish_constant,
 
 
 class OurPlayerNoMwu(BasePokerPlayer):
-    def __init__(self):
+    def __init__(self, weights=[1,1,1,1]):
         self.hand_scorer = HandScorer()
         self.action_weights = [1, 1, 1]
-        self.heuristic_weights = [1, 1, 1, 1]  # For Reduced heuristic function
+        self.heuristic_weights = weights  # For Reduced heuristic function
         self.stack_start_round = 0
         self.last_action = "call"
 
