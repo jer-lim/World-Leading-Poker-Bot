@@ -57,7 +57,7 @@ def main():
 
 def get_weights():
 	conn = HTTPSConnection(host)
-	conn.request("GET", "/weights");
+	conn.request("GET", "/12/weights");
 	response = conn.getresponse()
 	weights = json.loads(response.read(9999))
 	conn.close()
@@ -66,7 +66,7 @@ def get_weights():
 
 def get_test():
 	conn = HTTPSConnection(host)
-	conn.request("GET", "/test");
+	conn.request("GET", "/12/test");
 	response = conn.getresponse()
 	test = json.loads(response.read(9999))
 	conn.close()
@@ -75,7 +75,7 @@ def get_test():
 
 def post_result(result):
 	conn = HTTPSConnection(host)
-	conn.request("POST", "/submit", json.dumps(result))
+	conn.request("POST", "/12/submit", json.dumps(result))
 	response = conn.getresponse()
 	test = json.loads(response.read(9999))
 	conn.close()
@@ -84,7 +84,7 @@ def post_result(result):
 
 def get_status():
 	conn = HTTPSConnection(host)
-	conn.request("GET", "/status");
+	conn.request("GET", "/12/status");
 	response = conn.getresponse()
 	status = json.loads(response.read(9999))
 	conn.close()
@@ -95,18 +95,15 @@ def print_test(test):
 
 def do_test(weights, test, min_game, current_iteration, current_weight):
 
-	weights = copy.deepcopy(weights)
+	new_weights = copy.deepcopy(weights)
 	weight = test['weight']
 	value = test['testValue']
-	weights[weight] = value
+	new_weights[weight] = value
 
 	config = setup_config(max_round=max_round, initial_stack=initial_stack, small_blind_amount=smallblind_amount)
 	# Register players
-	config.register_player(name="agent1", algorithm=OurPlayerNoMwu(weights))
-	config.register_player(name="agent2", algorithm=HandStrengthBot())
-
-	# Configuring other weights
-	config.players_info[0]['algorithm'].w = weights
+	config.register_player(name="agent1", algorithm=OurPlayerNoMwu(new_weights))
+	config.register_player(name="agent2", algorithm=OurPlayerNoMwu(weights))
 
 	# Start playing num_game games
 	agent1_pot = 0
