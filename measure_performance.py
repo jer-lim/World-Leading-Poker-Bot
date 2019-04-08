@@ -10,6 +10,7 @@ from raise_player import RaisedPlayer
 from call_player import CallPlayer
 from our_player import OurPlayer
 from our_player_copy import OurPlayerCopy
+from joblib import Parallel, delayed
 
 import pandas as pd
 """
@@ -22,7 +23,7 @@ MY_PLAYER = OurPlayer()
 
 def testperf(agent_name1, agent1, agent_name2, agent2):
     num_game = 5
-    max_round = 100
+    max_round = 10
     initial_stack = 10000
     smallblind_amount = 20
 
@@ -44,15 +45,22 @@ def testperf(agent_name1, agent1, agent_name2, agent2):
 
 
     # Start playing num_game games
-    for game in range(1, num_game + 1):
-
+    def play_game(game):
         print("Game number: ", game)
         game_result, result_hist = start_poker(config, verbose=0)
-        agent1_pot = agent1_pot + game_result['players'][0]['stack']
-        agent2_pot = agent2_pot + game_result['players'][1]['stack']
-        print(results)
-        results = results.add(result_hist, fill_value=0)
-        print(results)
+        #agent1_pot = agent1_pot + game_result['players'][0]['stack']
+        #agent2_pot = agent2_pot + game_result['players'][1]['stack']
+        print(result_hist)
+        return result_hist
+
+
+    game_results = Parallel(n_jobs=-1)(delayed(play_game)(game) for game in range(1, num_game + 1))
+    for r in game_results:
+        results.add(r, fill_value=0)
+
+
+
+
     results.to_csv("data.csv")
 
 
