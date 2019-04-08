@@ -102,7 +102,7 @@ def do_test(weights, test, min_game, current_iteration, current_weight):
 
 	config = setup_config(max_round=max_round, initial_stack=initial_stack, small_blind_amount=smallblind_amount)
 	# Register players
-	config.register_player(name="agent1", algorithm=OurPlayerNoMwu())
+	config.register_player(name="agent1", algorithm=OurPlayerNoMwu(weights))
 	config.register_player(name="agent2", algorithm=HandStrengthBot())
 
 	# Configuring other weights
