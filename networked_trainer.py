@@ -139,10 +139,10 @@ def do_test(weights, test, min_game, current_iteration, current_weight):
 			agent1_pot = agent1_pot + result[0]
 			agent2_pot = agent2_pot + result[1]
 
-		# status = get_status()
-		# if status['iteration'] == current_iteration or status['weight'] != current_weight:
-		# 	print("Current iteration/weight changed. Stopping current training.")
-		# 	games = 0;
+		status = get_status()
+		if status['iteration'] != current_iteration or status['weight'] != current_weight:
+			print("Current iteration/weight changed. Stopping current training.")
+			games = 0;
 
 	performance = (agent1_pot - agent2_pot) / num_games_ran
 	return performance
