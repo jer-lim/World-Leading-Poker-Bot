@@ -5,6 +5,8 @@ setup_config = game.setup_config
 start_poker = game.start_poker
 import time
 from argparse import ArgumentParser
+import multiprocessing
+from multiprocessing import Process, Queue
 
 
 """ =========== *Remember to import your agent!!! =========== """
@@ -12,6 +14,7 @@ from random_player import RandomPlayer
 from raise_player import RaisedPlayer
 from scaramucci import BootStrapBot
 from our_player_no_mwu import OurPlayerNoMwu
+from our_player_no_mwu2 import OurPlayerNoMwu2
 from hand_strength import HandStrengthBot
 # from smartwarrior import SmartWarrior
 """ ========================================================= """
@@ -24,8 +27,8 @@ $ python testperf.py -n1 "Random Warrior 1" -a1 RandomPlayer -n2 "Random Warrior
 def testperf(agent_name1, agent1, agent_name2, agent2):
 
 	# Init to play 500 games of 1000 rounds
-	num_game = 10
-	max_round = 100
+	num_game = 100
+	max_round = 1000
 	initial_stack = 10000
 	smallblind_amount = 20
 
@@ -37,19 +40,38 @@ def testperf(agent_name1, agent1, agent_name2, agent2):
 	config = setup_config(max_round=max_round, initial_stack=initial_stack, small_blind_amount=smallblind_amount)
 	
 	# Register players
-	config.register_player(name=agent_name1, algorithm=OurPlayerNoMwu())
-	config.register_player(name=agent_name2, algorithm=HandStrengthBot())
+	config.register_player(name=agent_name1, algorithm=OurPlayerNoMwu([0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5]))
+	config.register_player(name=agent_name2, algorithm=OurPlayerNoMwu([0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1]))
 	# config.register_player(name=agent_name1, algorithm=agent1())
 	# config.register_player(name=agent_name2, algorithm=agent2())
 	
+	return_queue = Queue()
+	num_threads = multiprocessing.cpu_count() - 1
+	games = num_game
+	num_games_ran = 0
+	while games > 0:
+		# start a thread for each remaining game up to threadcount limit
+		threads = []
+		game_runners = []
+		for i in range(0, num_threads):
+			if games > 0:
+				games -= 1
+				num_games_ran += 1
+				game_runners += [GameRunner(config, return_queue)]
+				threads += [Process(target = game_runners[i].start_game)]
+				print("Game Number " + str(num_games_ran))
+				threads[i].start()
 
-	# Start playing num_game games
-	for game in range(1, num_game+1):
-		print("Game number: ", game)
-		game_result = start_poker(config, verbose=0)
-		agent1_pot = agent1_pot + game_result[0]['players'][0]['stack']
-		agent2_pot = agent2_pot + game_result[0]['players'][1]['stack']
-		print(str(game_result[0]['players'][0]['stack']) + " vs " + str(game_result[0]['players'][1]['stack']))
+		# join all threads
+		for i in range(0, len(threads)):
+			threads[i].join()
+
+		# process returned data
+		while not return_queue.empty():
+			result = return_queue.get()
+			agent1_pot = agent1_pot + result[0]
+			agent2_pot = agent2_pot + result[1]
+			print(str(agent1_pot) + " vs " + str(agent2_pot))
 
 	print("\n After playing {} games of {} rounds, the results are: ".format(num_game, max_round))
 	# print("\n Agent 1's final pot: ", agent1_pot)
@@ -67,6 +89,16 @@ def testperf(agent_name1, agent1, agent_name2, agent2):
 		# print("\n Random Player has won!")
 	else:
 		Print("\n It's a draw!") 
+
+class GameRunner(object):
+    def __init__(self, config, return_queue):
+        self.config = config
+        self.return_queue = return_queue
+
+    def start_game(self):
+        game_result = start_poker(self.config, verbose=0)
+        result = (game_result[0]['players'][0]['stack'], game_result[0]['players'][1]['stack'])
+        self.return_queue.put(result)
 
 
 def parse_arguments():
