@@ -92,13 +92,13 @@ class DecisionNode:
         self.opponent_called = opponent_called
         self.opponent_raised = opponent_raised
         if not win_prob:
-            #fh = factors.FASTHeuristic(self.heuristic_weights)
-            #win_prob = fh.getEV(hole_cards, community_cards)
-            win_prob = estimate_hole_card_win_rate(
-                nb_simulation=10,
-                nb_player=2,
-                hole_card=self.hole_cards,
-                community_card=self.community_cards)
+            fh = factors.FASTHeuristic(self.heuristic_weights)
+            win_prob = fh.getEV(hole_cards, community_cards)
+            # win_prob = estimate_hole_card_win_rate(
+            #     nb_simulation=10,
+            #     nb_player=2,
+            #     hole_card=self.hole_cards,
+            #     community_card=self.community_cards)
         self.win_prob = win_prob
 
     def getBestAction(self, actions, weights):
