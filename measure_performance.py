@@ -8,7 +8,7 @@ from argparse import ArgumentParser
 from random_player import RandomPlayer
 from raise_player import RaisedPlayer
 from call_player import CallPlayer
-from our_player import OurPlayer
+from our_player_alternative import OurPlayerAlternative
 from our_player_copy import OurPlayerCopy
 from joblib import Parallel, delayed
 
@@ -19,11 +19,11 @@ Assign the player you want to test as MY_PLAYER (Make sure you import the player
 
 Run `python measure_performance.py` in root directory
 """
-MY_PLAYER = OurPlayer()
+MY_PLAYER = OurPlayerAlternative()
 
 def testperf(agent_name1, agent1, agent_name2, agent2):
-    num_game = 5
-    max_round = 10
+    num_game = 100
+    max_round = 200
     initial_stack = 10000
     smallblind_amount = 20
 
@@ -64,7 +64,7 @@ def testperf(agent_name1, agent1, agent_name2, agent2):
 
 
 
-    results.to_csv("data.csv")
+    results.to_csv("data_for_alternative.csv")
 
 
 

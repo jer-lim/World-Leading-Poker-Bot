@@ -29,7 +29,7 @@ def MWU(action_weights, factor_to_punish, punish_constant,
     return action_weights
 
 
-class OurPlayer(BasePokerPlayer):
+class OurPlayerAlternative(BasePokerPlayer):
     def __init__(self):
         self.action_weights = [1, 1.1, 0.9]
         self.stack_start_round = 0
