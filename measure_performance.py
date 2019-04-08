@@ -55,8 +55,11 @@ def testperf(agent_name1, agent1, agent_name2, agent2):
 
 
     game_results = Parallel(n_jobs=-1)(delayed(play_game)(game) for game in range(1, num_game + 1))
+
+
+
     for r in game_results:
-        results.add(r, fill_value=0)
+        results = results.add(r, fill_value=0)
 
 
 
