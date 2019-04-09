@@ -57,7 +57,7 @@ def main():
 
 def get_weights():
 	conn = HTTPSConnection(host)
-	conn.request("GET", "/12/weights");
+	conn.request("GET", "/13/weights");
 	response = conn.getresponse()
 	weights = json.loads(response.read(9999))
 	conn.close()
@@ -66,7 +66,7 @@ def get_weights():
 
 def get_test():
 	conn = HTTPSConnection(host)
-	conn.request("GET", "/12/test");
+	conn.request("GET", "/13/test");
 	response = conn.getresponse()
 	test = json.loads(response.read(9999))
 	conn.close()
@@ -75,7 +75,7 @@ def get_test():
 
 def post_result(result):
 	conn = HTTPSConnection(host)
-	conn.request("POST", "/12/submit", json.dumps(result))
+	conn.request("POST", "/13/submit", json.dumps(result))
 	response = conn.getresponse()
 	test = json.loads(response.read(9999))
 	conn.close()
@@ -84,7 +84,7 @@ def post_result(result):
 
 def get_status():
 	conn = HTTPSConnection(host)
-	conn.request("GET", "/12/status");
+	conn.request("GET", "/13/status");
 	response = conn.getresponse()
 	status = json.loads(response.read(9999))
 	conn.close()
