@@ -31,7 +31,8 @@ RAISE_TURN_THRESHOLD = 4
 
 
 class AdversarialSearch:
-    def __init__(self, hole_cards, community_cards, pot, heuristic_weights):
+    def __init__(self, is_big_blind, hole_cards, community_cards, pot, heuristic_weights):
+        self.is_big_blind = is_big_blind
         self.hole_cards = hole_cards
         self.community_cards = community_cards
         self.pot = pot
@@ -92,7 +93,7 @@ class DecisionNode:
         self.opponent_called = opponent_called
         self.opponent_raised = opponent_raised
         if not win_prob:
-            fh = factors.FASTHeuristic(self.heuristic_weights)
+            fh = factors.FASTHeuristic(self.is_big_blind, self.heuristic_weights)
             win_prob = fh.getEV(hole_cards, community_cards)
             # win_prob = estimate_hole_card_win_rate(
             #     nb_simulation=10,

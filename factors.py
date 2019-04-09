@@ -3,7 +3,7 @@ from pypokerengine.engine.card import Card
 
 # Factors Actively Selectively Taken
 class FASTHeuristic:
-        def __init__(self, weights):
+        def __init__(self, is_big_blind, weights):
                 # Array of weights
                 # 0 - High Card [highCard]
                 # 1 - Pair Strength [singlePairStrength]
@@ -18,9 +18,11 @@ class FASTHeuristic:
                 # 10 - Flush Strength [flushStrength]
                 # 11 - Higher Flushes [possibleFlushes]
                 #    - Full House or Higher [haveFullHouseOrBetter] (Always infinite EV, #yolo)
+                # 12 - Whether we are big blind [self.is_big_blind]
                 self.weights = weights
+                self.is_big_blind = is_big_blind
                 # self.max_values = [13, 13, 5, 15, 13, 10, 13, 5, 13, 12, 13, 2]
-                self.max_values = [13, 13, 0, 15, 13, 0, 13, 0, 13, 0, 13, 0]
+                self.max_values = [13, 13, 0, 15, 13, 0, 13, 0, 13, 0, 13, 0, 1]
                 maximum = 0
                 for i in range(0,12):
                         maximum += self.max_values[i]*self.weights[i]
@@ -80,7 +82,10 @@ class FASTHeuristic:
 
         def __linearCombination(self, factors):
                 # print(factors)
-                total = 0
+
+                # Also add if we are big blind
+                total = self.weights[12]*self.is_big_blind
+                
                 for i in range(0, 12):
                         total += self.weights[i] * factors[i]
                 return max(0, total/self.maximum)
@@ -182,7 +187,6 @@ class DecomposedCards:
         
         def numberOfOuts(self):
                 outs = 0
-                out_cards = []
                 # Calculate straight outs
                 pattern = 0
                 for rank in self.num_rank:
@@ -363,34 +367,34 @@ class DecomposedCards:
                                 
 ########## TEST ##########
 
-hole_card_list = ['C4', 'D2']
-community_card_list = ['D4', 'C5', 'CQ', 'CA', 'HK']
-
-hole_card = gen_cards(hole_card_list)
-community_card = gen_cards(community_card_list)                                                                
-cards = DecomposedCards(hole_card, community_card)
-
-print("Hole cards: " + str(hole_card_list))
-print("Community cards: " + str(community_card_list))
-print()
-print("0 highCard: " + str(cards.highCard()))
-print("1 singlePairStrength: " + str(cards.singlePairStrength()))
-print("2 numberOfHigherFormableSinglePairs: " + str(cards.numberOfHigherFormableSinglePairs()))
-print("3 numberOfOuts: " + str(cards.numberOfOuts()))
-print("4 doublePairStrength: " + str(cards.doublePairStrength()))
-print("5 numberOfHigherFormableDoublePairs: " + str(cards.numberOfHigherFormableDoublePairs()))
-print("6 tripleStrength: " + str(cards.tripleStrength()))
-print("7 numberOfHigherFormableTriples: " + str(cards.numberOfHigherFormableTriples()))
-print("8 straightStrength: " + str(cards.straightStrength()))
-print("9 possibleStraights: " + str(cards.possibleStraights()))
-print("10 flushStrength: "+ str(cards.flushStrength()))
-print("11 possibleFlushes: "+ str(cards.possibleFlushes()))
-print("haveStraightFlush: " + str(cards.haveStraightFlush()))
-print("haveFullHouse: " + str(cards.haveFullHouse()))
-print("INF haveFullHouseOrBetter: " + str(cards.haveFullHouseOrBetter()))
-print()
-
-fast = FASTHeuristic([1,1,1,1,1,1,1,1,1,1,1,1])
-
-print("FAST: " + str(fast.getEV(hole_card, community_card)))
+##hole_card_list = ['C4', 'D2']
+##community_card_list = ['D4', 'C5', 'CQ', 'CA', 'HK']
+##
+##hole_card = gen_cards(hole_card_list)
+##community_card = gen_cards(community_card_list)                                                                
+##cards = DecomposedCards(hole_card, community_card)
+##
+##print("Hole cards: " + str(hole_card_list))
+##print("Community cards: " + str(community_card_list))
+##print()
+##print("0 highCard: " + str(cards.highCard()))
+##print("1 singlePairStrength: " + str(cards.singlePairStrength()))
+##print("2 numberOfHigherFormableSinglePairs: " + str(cards.numberOfHigherFormableSinglePairs()))
+##print("3 numberOfOuts: " + str(cards.numberOfOuts()))
+##print("4 doublePairStrength: " + str(cards.doublePairStrength()))
+##print("5 numberOfHigherFormableDoublePairs: " + str(cards.numberOfHigherFormableDoublePairs()))
+##print("6 tripleStrength: " + str(cards.tripleStrength()))
+##print("7 numberOfHigherFormableTriples: " + str(cards.numberOfHigherFormableTriples()))
+##print("8 straightStrength: " + str(cards.straightStrength()))
+##print("9 possibleStraights: " + str(cards.possibleStraights()))
+##print("10 flushStrength: "+ str(cards.flushStrength()))
+##print("11 possibleFlushes: "+ str(cards.possibleFlushes()))
+##print("haveStraightFlush: " + str(cards.haveStraightFlush()))
+##print("haveFullHouse: " + str(cards.haveFullHouse()))
+##print("INF haveFullHouseOrBetter: " + str(cards.haveFullHouseOrBetter()))
+##print()
+##fast = FASTHeuristic(True, [1,1,1,1,1,1,1,1,1,1,1,1,1])
+##print("12 isBigBlind: " + str(fast.is_big_blind))
+##print()
+##print("FAST: " + str(fast.getEV(hole_card, community_card)))
 
