@@ -182,7 +182,7 @@ class DecomposedCards:
         
         def numberOfOuts(self):
                 outs = 0
-
+                out_cards = []
                 # Calculate straight outs
                 pattern = 0
                 for rank in self.num_rank:
@@ -212,9 +212,16 @@ class DecomposedCards:
         
                 # Calculate flush outs
                 overlap = int(outs / 4)
+                flush_outs_suit = None
                 for suit in self.num_suits:
                         if self.num_suits[suit] == 4 and self.comm_card_num_suits[suit] != 4:
                                 outs += 9 - overlap
+                                flush_outs_suit = suit
+                
+                # Calculate triple outs (Estimation)
+                for rank in self.num_rank:
+                        if self.num_rank[rank] == 2 and not self.comm_card_num_rank[rank] == 2:
+                                outs += 1.75
                 return outs
 
         def doublePairStrength(self):
@@ -356,34 +363,34 @@ class DecomposedCards:
                                 
 ########## TEST ##########
 
-# hole_card_list = ['C4', 'DQ']
-# community_card_list = ['D4', 'C5', 'CQ', 'CA', 'HK']
+hole_card_list = ['C4', 'D2']
+community_card_list = ['D4', 'C5', 'CQ', 'CA', 'HK']
 
-# hole_card = gen_cards(hole_card_list)
-# community_card = gen_cards(community_card_list)                                                                
-# cards = DecomposedCards(hole_card, community_card)
+hole_card = gen_cards(hole_card_list)
+community_card = gen_cards(community_card_list)                                                                
+cards = DecomposedCards(hole_card, community_card)
 
-# print("Hole cards: " + str(hole_card_list))
-# print("Community cards: " + str(community_card_list))
-# print()
-# print("0 highCard: " + str(cards.highCard()))
-# print("1 singlePairStrength: " + str(cards.singlePairStrength()))
-# print("2 numberOfHigherFormableSinglePairs: " + str(cards.numberOfHigherFormableSinglePairs()))
-# print("3 numberOfOuts: " + str(cards.numberOfOuts()))
-# print("4 doublePairStrength: " + str(cards.doublePairStrength()))
-# print("5 numberOfHigherFormableDoublePairs: " + str(cards.numberOfHigherFormableDoublePairs()))
-# print("6 tripleStrength: " + str(cards.tripleStrength()))
-# print("7 numberOfHigherFormableTriples: " + str(cards.numberOfHigherFormableTriples()))
-# print("8 straightStrength: " + str(cards.straightStrength()))
-# print("9 possibleStraights: " + str(cards.possibleStraights()))
-# print("10 flushStrength: "+ str(cards.flushStrength()))
-# print("11 possibleFlushes: "+ str(cards.possibleFlushes()))
-# print("haveStraightFlush: " + str(cards.haveStraightFlush()))
-# print("haveFullHouse: " + str(cards.haveFullHouse()))
-# print("INF haveFullHouseOrBetter: " + str(cards.haveFullHouseOrBetter()))
-# print()
+print("Hole cards: " + str(hole_card_list))
+print("Community cards: " + str(community_card_list))
+print()
+print("0 highCard: " + str(cards.highCard()))
+print("1 singlePairStrength: " + str(cards.singlePairStrength()))
+print("2 numberOfHigherFormableSinglePairs: " + str(cards.numberOfHigherFormableSinglePairs()))
+print("3 numberOfOuts: " + str(cards.numberOfOuts()))
+print("4 doublePairStrength: " + str(cards.doublePairStrength()))
+print("5 numberOfHigherFormableDoublePairs: " + str(cards.numberOfHigherFormableDoublePairs()))
+print("6 tripleStrength: " + str(cards.tripleStrength()))
+print("7 numberOfHigherFormableTriples: " + str(cards.numberOfHigherFormableTriples()))
+print("8 straightStrength: " + str(cards.straightStrength()))
+print("9 possibleStraights: " + str(cards.possibleStraights()))
+print("10 flushStrength: "+ str(cards.flushStrength()))
+print("11 possibleFlushes: "+ str(cards.possibleFlushes()))
+print("haveStraightFlush: " + str(cards.haveStraightFlush()))
+print("haveFullHouse: " + str(cards.haveFullHouse()))
+print("INF haveFullHouseOrBetter: " + str(cards.haveFullHouseOrBetter()))
+print()
 
-# fast = FASTHeuristic([1,1,1,1,1,1,1,1,1,1,1,1])
+fast = FASTHeuristic([1,1,1,1,1,1,1,1,1,1,1,1])
 
-# print("FAST: " + str(fast.getEV(hole_card, community_card)))
+print("FAST: " + str(fast.getEV(hole_card, community_card)))
 
