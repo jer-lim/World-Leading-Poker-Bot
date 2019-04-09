@@ -1,5 +1,5 @@
 import random
-import pandas as pd
+import pprint
 from collections import OrderedDict
 
 from pypokerengine.engine.poker_constants import PokerConstants as Const
@@ -30,18 +30,25 @@ class Dealer:
       self.message_summarizer.verbose = verbose
 
   def start_game(self, max_round):
-    self.table.data = pd.DataFrame(index=range(1, max_round+1), columns=[x.name for x in self.table.seats.players])
     table = self.table
     self.__notify_game_start(max_round)
     ante, sb_amount = self.ante, self.small_blind_amount
     for round_count in range(1, max_round+1):
+      # print("Dealer Out %d : "%round_count)
+      # pprint.pprint(table.seats.serialize())
+
       ante, sb_amount = self.__update_forced_bet_amount(ante, sb_amount, round_count, self.blind_structure)
       table = self.__exclude_short_of_money_players(table, ante, sb_amount)
+      # print("Dealer Out (post exc) %d : "%round_count)
+      # pprint.pprint(table.seats.serialize())
       if self.__is_game_finished(table): break
       table = self.play_round(round_count, sb_amount, ante, table)
       table.shift_dealer_btn()
-    return self.__generate_game_result(max_round, table.seats), self.table.data
+    # print("Dealer Out (post play) %d : "%round_count)
+    # pprint.pprint(table.seats.serialize())
 
+    return self.__generate_game_result(max_round, table.seats)
+  
   def play_round(self, round_count, blind_amount, ante, table):
     state, msgs = RoundManager.start_new_round(round_count, blind_amount, ante, table)
     while True:
@@ -53,10 +60,6 @@ class Dealer:
       else:  # finish the round after publish round result
         self.__publish_messages(msgs)
         break
-
-    #Storing round info
-    for player in state["table"].seats.players:
-        self.table.data[player.name][round_count] = player.stack
     return state["table"]
 
 
@@ -110,7 +113,11 @@ class Dealer:
     return self.message_handler.process_message(*msgs[-1])
 
   def __exclude_short_of_money_players(self, table, ante, sb_amount):
+    # print("Exclude Player (entry), ante = "+str(ante)+", sb = "+str(sb_amount))
+    # pprint.pprint(table.seats.serialize())
     sb_pos, bb_pos = self.__steal_money_from_poor_player(table, ante, sb_amount)
+    # print("Exclude Player (post steal)")
+    # pprint.pprint(table.seats.serialize())
     self.__disable_no_money_player(table.seats.players)
     table.set_blind_pos(sb_pos, bb_pos)
     if table.seats.players[table.dealer_btn].stack == 0: table.shift_dealer_btn()
@@ -119,7 +126,9 @@ class Dealer:
   def __steal_money_from_poor_player(self, table, ante, sb_amount):
     players = table.seats.players
     # exclude player who cannot pay ante
-    for player in [p for p in players if p.stack < ante]: player.stack = 0
+    for player in [p for p in players if p.stack < ante]: 
+      # player.stack = 0
+      player.too_poor = True
     if players[table.dealer_btn].stack == 0: table.shift_dealer_btn()
 
     search_targets = players + players + players
@@ -127,12 +136,16 @@ class Dealer:
     # exclude player who cannot pay small blind
     sb_player = self.__find_first_elligible_player(search_targets, sb_amount + ante)
     sb_relative_pos = search_targets.index(sb_player)
-    for player in search_targets[:sb_relative_pos]: player.stack = 0
+    for player in search_targets[:sb_relative_pos]: 
+      # player.stack    = 0
+      player.too_poor = True
     # exclude player who cannot pay big blind
     search_targets = search_targets[sb_relative_pos+1:sb_relative_pos+len(players)]
     bb_player = self.__find_first_elligible_player(search_targets, sb_amount*2 + ante, sb_player)
     if sb_player == bb_player:  # no one can pay big blind. So steal money from all players except small blind
-        for player in [p for p in players if p!=bb_player]: player.stack = 0
+        for player in [p for p in players if p!=bb_player]: 
+          # player.stack = 0
+          player.too_poor = True
     else:
       bb_relative_pos = search_targets.index(bb_player)
       for player in search_targets[:bb_relative_pos]: player.stack = 0
@@ -144,7 +157,13 @@ class Dealer:
     return next((player for player in players if player.stack >= need_amount))
 
   def __disable_no_money_player(self, players):
-    no_money_players = [player for player in players if player.stack == 0]
+    """
+        This actually disables all the poor players
+        because now we do not steal money from the poor
+        players
+    """
+    # no_money_players = [player for player in players if player.stack == 0]
+    no_money_players = [player for player in players if player.too_poor]
     for player in no_money_players:
       player.pay_info.update_to_fold()
 
@@ -279,3 +298,4 @@ class MessageSummarizer(object):
     def summairze_blind_level_update(self, round_count, old_ante, new_ante, old_sb_amount, new_sb_amount):
         base = 'Blind level update at round-%d : Ante %s -> %s, SmallBlind %s -> %s'
         return base % (round_count, old_ante, new_ante, old_sb_amount, new_sb_amount)
+

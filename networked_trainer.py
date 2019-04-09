@@ -151,7 +151,7 @@ class GameRunner(object):
 
     def start_game(self):
         game_result = start_poker(self.config, verbose=0)
-        result = (game_result[0]['players'][0]['stack'], game_result[0]['players'][1]['stack'])
+        result = (game_result['players'][0]['stack'], game_result['players'][1]['stack'])
         self.return_queue.put(result)
 
 main()

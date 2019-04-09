@@ -13,8 +13,8 @@ def start_poker(config, verbose=2):
     for info in config.players_info:
         dealer.register_player(info["name"], info["algorithm"])
         # print(info["algorithm"].declare_action)
-    result_message, result = dealer.start_game(config.max_round)
-    return _format_result(result_message), result
+    result_message = dealer.start_game(config.max_round)
+    return _format_result(result_message)
 
 def _format_result(result_message):
     return {
@@ -39,7 +39,7 @@ class Config(object):
 
         # Wrap the function with a timeout
         default_action_info      = "fold"
-        algorithm.declare_action = timeout2(1, default_action_info)(algorithm.declare_action)
+        algorithm.declare_action = timeout2(0.5,default_action_info)(algorithm.declare_action)
         info = { "name" : name, "algorithm" : algorithm }
         self.players_info.append(info)
 
@@ -52,3 +52,4 @@ class Config(object):
             detail_msg = "no player is registered yet" if player_num==0 else "you registered only 1 player"
             base_msg = "At least 2 players are needed to start the game"
             raise Exception("%s (but %s.)" % (base_msg, detail_msg))
+
