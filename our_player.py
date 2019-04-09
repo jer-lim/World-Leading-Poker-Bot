@@ -30,11 +30,12 @@ def MWU(action_weights, factor_to_punish, punish_constant,
 
 
 class OurPlayer(BasePokerPlayer):
-    def __init__(self):
+    def __init__(self, alpha = 0.000001):
         self.action_weights = [1, 1.1, 0.9]
         self.stack_start_round = 0
         self.last_action = "call"
         self.action_counts = [0,0]
+        self.alpha = alpha
 
     def declare_action(self, valid_actions, hole_card, round_state):
         if round_state["street"] == "preflop":
@@ -78,16 +79,16 @@ class OurPlayer(BasePokerPlayer):
                    round_state["seats"]))[0]["stack"]
         to_penalize = self.last_action
         if to_penalize == "fold":
-            self.action_weights = MWU(self.action_weights, self.last_action, 0.000001,
+            self.action_weights = MWU(self.action_weights, self.last_action, self.alpha,
                                       self.stack_start_round - new_stack)
         else:
             if self.action_counts[0] > self.action_counts[1]:
-                self.action_weights = MWU(self.action_weights, "call", 0.000001,
+                self.action_weights = MWU(self.action_weights, "call", self.alpha,
                                           self.stack_start_round - new_stack)
-                self.action_weights = MWU(self.action_weights, "raise", 0.000001,
+                self.action_weights = MWU(self.action_weights, "raise", self.alpha,
                                         self.stack_start_round - new_stack)
             else:
-                self.action_weights = MWU(self.action_weights, "raise", 0.000001,
+                self.action_weights = MWU(self.action_weights, "raise", self.alpha,
                                           self.stack_start_round - new_stack)
 
 
