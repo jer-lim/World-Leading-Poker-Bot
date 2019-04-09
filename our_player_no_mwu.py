@@ -32,22 +32,36 @@ def MWU(action_weights, factor_to_punish, punish_constant,
 
 
 class OurPlayerNoMwu(BasePokerPlayer):
-    def __init__(self, weights = [0.95, 0, 0.4, 0.25, 0.05, 0.1, 0.2, 0.9, 0.85, 0, 0.8, 1]):
+    def __init__(self, weights = [0.95, 0, 0.4, 0.25, 0.05, 0.1, 0.2, 0.9, 0.85, 0, 0.8, 1], preflop_weights = [-0.23, 0, 0, 0, 0, 0]):
         self.hand_scorer = HandScorer()
         self.action_weights = [1, 1, 1]
         self.heuristic_weights = weights  # For heuristic function
+        self.preflop_weights = preflop_weights
         self.stack_start_round = 0
         self.last_action = "call"
 
     def declare_action(self, valid_actions, hole_card, round_state):
+        self.is_big_blind = self.__is_big_blind(round_state)
         if round_state["street"] == "preflop":
             #PREFLOP
+            bb_score = 1
             score = self.hand_scorer.score_hole_cards(hole_card)
-            if score < -0.23:
+            # Fold Below
+            if score < self.preflop_weights[0] + self.preflop_weights[4] * bb_score:
                 return "fold"
-            elif score < 0:
+            # Raise Above
+            elif score < self.preflop_weights[1] + self.preflop_weights[5] * bb_score:
+                # Bluff Raise
+                if rand.random() < self.preflop_weights[2]:
+                    if {"action": "raise"} in valid_actions:
+                        return "raise"
+                    else:
+                        return "call"
                 return "call"
             else:
+                # Bluff Call
+                if rand.random() < self.preflop_weights[3]:
+                    return "call"
                 if {"action": "raise"} in valid_actions:
                     return "raise"
                 else:
@@ -56,7 +70,6 @@ class OurPlayerNoMwu(BasePokerPlayer):
         hole_cards = gen_cards(hole_card)
         community_cards = gen_cards(round_state["community_card"])
         pot = round_state["pot"]["main"]["amount"]
-        self.is_big_blind = self.__is_big_blind(round_state)
         self.last_action = AdversarialSearch(self,
             hole_cards, community_cards,
             pot, self.heuristic_weights).decide([action.get("action") for action in valid_actions],
