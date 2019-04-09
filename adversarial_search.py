@@ -31,15 +31,15 @@ RAISE_TURN_THRESHOLD = 4
 
 
 class AdversarialSearch:
-    def __init__(self, is_big_blind, hole_cards, community_cards, pot, heuristic_weights):
-        self.is_big_blind = is_big_blind
+    def __init__(self, our_player, hole_cards, community_cards, pot, heuristic_weights):
+        self.our_player = our_player
         self.hole_cards = hole_cards
         self.community_cards = community_cards
         self.pot = pot
         self.heuristic_weights = heuristic_weights
 
     def decide(self, actions, weights):
-        node = DecisionNode(0, self.hole_cards, self.community_cards, self.pot,
+        node = DecisionNode(self.our_player, 0, self.hole_cards, self.community_cards, self.pot,
                             self.heuristic_weights,
                             len(self.community_cards) == 3)
         return node.getBestAction(actions, weights)
@@ -61,6 +61,7 @@ class TerminalNode:
 
 class DecisionNode:
     def __init__(self,
+                 our_player,
                  turn,
                  hole_cards,
                  community_cards,
@@ -81,6 +82,7 @@ class DecisionNode:
         opponent_raised: True if opponent raised right before
         """
 
+        self.our_player = our_player
         self.hole_cards = hole_cards
         self.turn = turn
         self.opponent = 1 - self.turn
@@ -93,7 +95,7 @@ class DecisionNode:
         self.opponent_called = opponent_called
         self.opponent_raised = opponent_raised
         if not win_prob:
-            fh = factors.FASTHeuristic(self.is_big_blind, self.heuristic_weights)
+            fh = factors.FASTHeuristic(self.our_player.is_big_blind, self.heuristic_weights)
             win_prob = fh.getEV(hole_cards, community_cards)
             # win_prob = estimate_hole_card_win_rate(
             #     nb_simulation=10,
@@ -191,6 +193,7 @@ class DecisionNode:
         else:
             increment_val = 10
         return DecisionNode(
+            self.our_player,
             self.opponent,
             self.hole_cards,
             self.community_cards,
@@ -219,10 +222,11 @@ class DecisionNode:
             if self.remaining_cards == 0:
                 return EndingNode(self.expected_value())
             else:
-                return ChanceNode(self.hole_cards, self.community_cards,
+                return ChanceNode(self.our_player, self.hole_cards, self.community_cards,
                                   self.pot, self.heuristic_weights,
                                   self.is_flop)
         return DecisionNode(
+            self.our_player,
             self.opponent,
             self.hole_cards,
             self.community_cards,
@@ -252,8 +256,9 @@ class FoldedNode(TerminalNode):
 
 
 class ChanceNode(TerminalNode):
-    def __init__(self, hole_cards, community_cards, pot, heuristic_weights,
+    def __init__(self, our_player, hole_cards, community_cards, pot, heuristic_weights,
                  is_flop):
+        self.our_player = our_player
         self.hole_cards = hole_cards
         self.community_cards = community_cards
         self.pot = pot
@@ -282,7 +287,7 @@ class ChanceNode(TerminalNode):
                 self.community_cards + [new_card])["hand"]["strength"]
             if strength not in memo:
                 memo[strength] = DecisionNode(
-                    0, self.hole_cards, self.community_cards + [new_card],
+                    self.our_player, 0, self.hole_cards, self.community_cards + [new_card],
                     self.pot, self.heuristic_weights, self.is_flop).eval()
             count[strength] += 1
 

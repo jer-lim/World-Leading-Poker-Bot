@@ -56,8 +56,8 @@ class OurPlayerNoMwu(BasePokerPlayer):
         hole_cards = gen_cards(hole_card)
         community_cards = gen_cards(round_state["community_card"])
         pot = round_state["pot"]["main"]["amount"]
-        is_big_blind = __is_big_blind(round_state)
-        self.last_action = AdversarialSearch(is_big_blind,
+        self.is_big_blind = self.__is_big_blind(round_state)
+        self.last_action = AdversarialSearch(self,
             hole_cards, community_cards,
             pot, self.heuristic_weights).decide([action.get("action") for action in valid_actions],
                         self.action_weights)
@@ -69,9 +69,17 @@ class OurPlayerNoMwu(BasePokerPlayer):
         else:
             return False
 
-    def receive_game_start_message(self, game_info):
+    def __find_position(self, game_info):
+        seatNum = 0
+        for seat in game_info['seats']:
+            if seat['uuid'] != self.uuid:
+                seatNum += 1
+            else:
+                break
+        return seatNum
 
-        pass
+    def receive_game_start_message(self, game_info):
+        self.seatNum = self.__find_position(game_info)
 
     def receive_round_start_message(self, round_count, hole_card, seats):
 
