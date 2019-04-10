@@ -1,5 +1,7 @@
 import sys
-sys.path.insert(0, './pypokerengine/api/')
+import os 
+dir_path = os.path.dirname(os.path.realpath(__file__))
+sys.path.insert(0, dir_path + '/pypokerengine/api/')
 import game
 setup_config = game.setup_config
 start_poker = game.start_poker
@@ -39,8 +41,9 @@ def testperf(agent_name1, agent1, agent_name2, agent2):
 	config = setup_config(max_round=max_round, initial_stack=initial_stack, small_blind_amount=smallblind_amount)
 	
 	# Register players
-	config.register_player(name=agent_name1, algorithm=OurPlayerNoMwu([0.91, 0.9, 0.38, 0.98, 0.18, 0.37, 0.55, 0.17, 0.06, 0.22, 0, 0.12, 0]))
-	config.register_player(name=agent_name2, algorithm=OurPlayerNoMwu([0.63, 0.87, 0.40, 1, 0.75, 0.49, 0.09, 0.87, 0.45, 0, 0.09, 0.14, 0.44]))
+	config.register_player(name=agent_name1, algorithm=OurPlayerNoMwu([0.8425,2.3519,0.19,1.6801,0.7491,0.3869,0.855,0.7166,-0.24,0.085,-0.21,0.035,0.52]))
+	#config.register_player(name=agent_name2, algorithm=OurPlayerNoMwu([0.63,0.83,0.4,1,0.75,0.49,0.38,0.87,0.21,0,0,0.14,0.44]))
+	config.register_player(name=agent_name2, algorithm=HandStrengthBot())
 	# config.register_player(name=agent_name1, algorithm=agent1())
 	# config.register_player(name=agent_name2, algorithm=agent2())
 	

@@ -59,7 +59,7 @@ def main():
 
 def get_weights():
 	conn = HTTPSConnection(host)
-	conn.request("GET", "/13/weights");
+	conn.request("GET", "/preflop/6/weights");
 	response = conn.getresponse()
 	weights = json.loads(response.read(9999))
 	conn.close()
@@ -68,7 +68,7 @@ def get_weights():
 
 def get_test():
 	conn = HTTPSConnection(host)
-	conn.request("GET", "/13/test");
+	conn.request("GET", "/preflop/6/test");
 	response = conn.getresponse()
 	test = json.loads(response.read(9999))
 	conn.close()
@@ -77,7 +77,7 @@ def get_test():
 
 def post_result(result):
 	conn = HTTPSConnection(host)
-	conn.request("POST", "/13/submit", json.dumps(result))
+	conn.request("POST", "/preflop/6/submit", json.dumps(result))
 	response = conn.getresponse()
 	test = json.loads(response.read(9999))
 	conn.close()
@@ -86,7 +86,7 @@ def post_result(result):
 
 def get_status():
 	conn = HTTPSConnection(host)
-	conn.request("GET", "/13/status");
+	conn.request("GET", "/preflop/6/status");
 	response = conn.getresponse()
 	status = json.loads(response.read(9999))
 	conn.close()
@@ -104,8 +104,8 @@ def do_test(weights, test, min_game, current_iteration, current_weight):
 
 	config = setup_config(max_round=max_round, initial_stack=initial_stack, small_blind_amount=smallblind_amount)
 	# Register players
-	config.register_player(name="agent1", algorithm=OurPlayerNoMwu(new_weights))
-	config.register_player(name="agent2", algorithm=OurPlayerNoMwu(weights))
+	config.register_player(name="agent1", algorithm=OurPlayerNoMwu(preflop_weights=new_weights))
+	config.register_player(name="agent2", algorithm=OurPlayerNoMwu(preflop_weights=weights))
 
 	# Start playing num_game games
 	agent1_pot = 0
