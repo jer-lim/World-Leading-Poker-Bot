@@ -8,7 +8,7 @@ from argparse import ArgumentParser
 from random_player import RandomPlayer
 from raise_player import RaisedPlayer
 from call_player import CallPlayer
-from our_player_alternative import OurPlayerAlternative
+from our_player import OurPlayer
 from our_player_copy import OurPlayerCopy
 from joblib import Parallel, delayed
 
@@ -19,11 +19,11 @@ Assign the player you want to test as MY_PLAYER (Make sure you import the player
 
 Run `python measure_performance.py` in root directory
 """
-MY_PLAYER = OurPlayerAlternative()
+MY_PLAYER = OurPlayer
+def testperf(agent_name1, agent1, agent_name2, agent2, count):
 
-def testperf(agent_name1, agent1, agent_name2, agent2):
-    num_game = 10
-    max_round = 20
+    num_game = 1
+    max_round = 2
     initial_stack = 10000
     smallblind_amount = 20
 
@@ -31,15 +31,6 @@ def testperf(agent_name1, agent1, agent_name2, agent2):
     agent1_pot = 0
     agent2_pot = 0
 
-    # Setting configuration
-    config = setup_config(
-        max_round=max_round,
-        initial_stack=initial_stack,
-        small_blind_amount=smallblind_amount)
-
-    # Register players
-    config.register_player(name=agent_name1, algorithm=agent1)
-    config.register_player(name=agent_name2, algorithm=agent2)
 
 
     # Start playing num_game games
@@ -51,24 +42,28 @@ def testperf(agent_name1, agent1, agent_name2, agent2):
         print(result_hist)
         return result_hist
 
-    lrs = [0.1, 0.0001, 0.000001]
-    count = 0
-    for lr in lrs:
-        results = pd.DataFrame(0, index = range(1,max_round+1), columns=[x.name for x in [agent1, agent2]])
+    # Setting configuration
+    config = setup_config(
+        max_round=max_round,
+        initial_stack=initial_stack,
+        small_blind_amount=smallblind_amount)
 
-        game_results = Parallel(n_jobs=-1)(delayed(play_game)(game) for game in range(1, num_game + 1))
+    # Register players
+    config.register_player(name=agent_name1, algorithm=agent1)
+    config.register_player(name=agent_name2, algorithm=agent2)
+    results = pd.DataFrame(0, index = range(1,max_round+1), columns=[x.name for x in [agent1, agent2]])
+
+    game_results = Parallel(n_jobs=-1)(delayed(play_game)(game) for game in range(1, num_game + 1))
 
 
 
-        for r in game_results:
-            results = results.add(r, fill_value=0)
+    for r in game_results:
+        results = results.add(r, fill_value=0)
 
 
 
 
-        results.to_csv("data_learning_rate_%d.csv"%(count))
-        count += 1
-
+    results.to_csv("data_learning_rate_%d.csv"%(count))
 
 
     print("\n After playing {} games of {} rounds, the results are: ".format(
@@ -86,17 +81,21 @@ def testperf(agent_name1, agent1, agent_name2, agent2):
 
 if __name__ == '__main__':
     my_name = "ME"
-    my_agent = MY_PLAYER
-    MY_PLAYER.name = my_name
 
     players = {
         "no_mwu": OurPlayerCopy()
     }
-    for name, base_agent in players.items():
-        base_agent.name = name
-        start = time.time()
+    lrs = [0.1, 0.0001, 0.000001]
+    count = 0
+    for lr in lrs:
+        my_agent = MY_PLAYER(lr)
+        my_agent.name = my_name
+        for name, base_agent in players.items():
+            base_agent.name = name
+            start = time.time()
 
-        testperf(my_name, my_agent, name, base_agent)
-        end = time.time()
+            testperf(my_name, my_agent, name, base_agent, count)
+            end = time.time()
+            print("\n Time taken to play: %.4f seconds" % (end - start))
+        count += 1
 
-        print("\n Time taken to play: %.4f seconds" % (end - start))
