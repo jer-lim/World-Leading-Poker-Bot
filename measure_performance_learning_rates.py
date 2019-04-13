@@ -63,7 +63,7 @@ def testperf(agent_name1, agent1, agent_name2, agent2, count):
 
 
 
-    results.to_csv("data_learning_rate_%d.csv"%(count))
+    results.to_csv("data_binary_loss_%d.csv"%(count))
 
 
     print("\n After playing {} games of {} rounds, the results are: ".format(
@@ -85,7 +85,7 @@ if __name__ == '__main__':
     players = {
         "no_mwu": OurPlayerCopy()
     }
-    lrs = [0.5, 0.1]
+    lrs = [0.5, 0.3, 0.1]
     count = 0
     for lr in lrs:
         my_agent = MY_PLAYER(lr)
