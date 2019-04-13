@@ -1,7 +1,7 @@
 <?php
 declare (strict_types = 1);
 
-namespace Model;
+namespace Model\Factor13;
 
 /**
  * @property int id
@@ -12,7 +12,7 @@ namespace Model;
  */
 class Result extends \Illuminate\Database\Eloquent\Model
 {
-    public $table = "results";
+    public $table = "results13";
     public $timestamps = false;
     //public $primaryKey = ;
     //protected $keyType = string;
@@ -47,11 +47,28 @@ class Result extends \Illuminate\Database\Eloquent\Model
 
     public static function getBestResult(int $iteration, int $weight)
     {
-        return self::where("iteration", $iteration)
+
+        $results = self::where("iteration", $iteration)
             ->where("weight", $weight)
-            ->orderBy("result", "DESC")
-            ->limit(1)
-            ->first();
+            ->orderBy("test_value", "ASC")
+            ->get();
+        $numResults = count($results);
+
+        $averagedResults = [];
+        for ($i = 0; $i < $numResults; ++$i) {
+            $c = 0;
+            $num = 0;
+            for ($j = $i - 1; $j <= $i + 1; ++$j) {
+                if ($j >= 0 && $j < $numResults) {
+                    $c += $results[$j]->result;
+                    $num++;
+                }
+            }
+            $averagedResults[$i] = $c / $num;
+        }
+
+        $maxIndex = array_search(max($averagedResults), $averagedResults);
+        return $results[$maxIndex];
     }
 
     public static function createNew(int $iteration, int $weight, int $intervals, int $minGames)
@@ -59,6 +76,30 @@ class Result extends \Illuminate\Database\Eloquent\Model
         $interval = 1 / $intervals;
         for ($i = 0; $i < $intervals + 1; ++$i) {
             $value = $i * $interval;
+            $r = new self();
+            $r->iteration = $iteration;
+            $r->weight = $weight;
+            $r->test_value = $value;
+            $r->min_games = $minGames;
+            $r->save();
+        }
+    }
+
+    public static function createNewRanged(int $iteration, int $weight, int $intervals, int $minGames, $min, $current, $max)
+    {
+        $intervals /= 2;
+        for ($i = 0; $i <= $intervals; ++$i) {
+            $value = $min + ($current - $min) / $intervals * $i;
+            $r = new self();
+            $r->iteration = $iteration;
+            $r->weight = $weight;
+            $r->test_value = $value;
+            $r->min_games = $minGames;
+            $r->save();
+        }
+
+        for ($i = 1; $i <= $intervals; ++$i) {
+            $value = $current + ($max - $current) / $intervals * $i;
             $r = new self();
             $r->iteration = $iteration;
             $r->weight = $weight;

@@ -1,7 +1,7 @@
 <?php
 declare (strict_types = 1);
 
-namespace Model;
+namespace Model\Factor5;
 
 /**
  * @property int id
@@ -11,7 +11,7 @@ namespace Model;
  */
 class Weight extends \Illuminate\Database\Eloquent\Model
 {
-    public $table = "weights";
+    public $table = "weights5";
     public $timestamps = false;
     //public $primaryKey = ;
     //protected $keyType = string;
@@ -24,7 +24,7 @@ class Weight extends \Illuminate\Database\Eloquent\Model
         return self::where("id", ">", 0)
             ->orderBy("iteration", "DESC")
             ->orderBy("weight", "DESC")
-            ->limit(12)
+            ->limit(4)
             ->get();
     }
 

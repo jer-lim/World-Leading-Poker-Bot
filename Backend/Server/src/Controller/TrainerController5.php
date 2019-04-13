@@ -4,10 +4,10 @@ declare (strict_types = 1);
 namespace Controller;
 
 use Database\Database;
-use Model\Factor12\Result;
-use Model\Factor12\Weight;
+use Model\Factor5\Result;
+use Model\Factor5\Weight;
 
-class TrainerController
+class TrainerController5
 {
 
     public $minGames;
@@ -18,9 +18,9 @@ class TrainerController
     {
         Database::init();
 
-        $this->minGames = 50;
-        $this->intervals = 20;
-        $this->numWeights = 12;
+        $this->minGames = 250;
+        $this->intervals = 100;
+        $this->numWeights = 4;
     }
 
     public function getWeights()
@@ -35,6 +35,12 @@ class TrainerController
             }
         }
         print(json_encode($w));
+    }
+
+    public function t()
+    {
+        $bestResult = Result::getBestResult(6, 0);
+        print($bestResult->test_value);
     }
 
     public function getTrainingSet()

@@ -32,7 +32,7 @@ def MWU(action_weights, factor_to_punish, punish_constant,
 
 
 class OurPlayerNoMwu(BasePokerPlayer):
-    def __init__(self, weights = [0.8425,2.3519,0.19,1.6801,0.7491,0.3869,0.855,0.7166,-0.24,0.085,-0.21,0.035,0.52], preflop_weights = [-0.23, 0, 0, 0, 0, 0]):
+    def __init__(self, weights = [0.8425,2.3519,0.19,1.6801,0.7491,0.3869,0.855,0.7166,-0.24,0.085,-0.21,0.035,0.52,0.16,0.18], preflop_weights = [-0.23, 0, 0, 0, 0, 0]):
         self.hand_scorer = HandScorer()
         self.action_weights = [1, 1, 1]
         self.heuristic_weights = weights  # For heuristic function
@@ -42,15 +42,15 @@ class OurPlayerNoMwu(BasePokerPlayer):
 
     def declare_action(self, valid_actions, hole_card, round_state):
         self.is_big_blind = self.__is_big_blind(round_state)
+        self.score = self.hand_scorer.score_hole_cards(hole_card)
         if round_state["street"] == "preflop":
             #PREFLOP
             bb_score = 1
-            score = self.hand_scorer.score_hole_cards(hole_card)
             # Fold Below
-            if score < self.preflop_weights[0] + self.preflop_weights[4] * bb_score:
+            if self.score < self.preflop_weights[0] + self.preflop_weights[4] * bb_score:
                 return "fold"
             # Raise Above
-            elif score < self.preflop_weights[1] + self.preflop_weights[5] * bb_score:
+            elif self.score < self.preflop_weights[1] + self.preflop_weights[5] * bb_score:
                 # Bluff Raise
                 if rand.random() < self.preflop_weights[2]:
                     if {"action": "raise"} in valid_actions:

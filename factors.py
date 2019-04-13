@@ -3,34 +3,37 @@ from pypokerengine.engine.card import Card
 
 # Factors Actively Selectively Taken
 class FASTHeuristic:
-        def __init__(self, is_big_blind, weights):
+        def __init__(self, our_player, weights):
                 # Array of weights
-                # 0 - High Card [highCard]
-                # 1 - Pair Strength [singlePairStrength]
-                # 2 - Higher Pairs [numberOfHigherFormableSinglePairs]
-                # 3 - Outs [numberOfOuts]
-                # 4 - 2-Pair Strength [doublePairStrength]
-                # 5 - Higher 2-Pairs [numberOfFormableDoublePairs]
-                # 6 - Triple Strength [tripleStrength]
-                # 7 - Higher Triple [numberOfHigherFormableTriples]
-                # 8 - Straight Strength [straightStrength]
-                # 9 - Higher Straights [possibleStraights]
-                # 10 - Flush Strength [flushStrength]
-                # 11 - Higher Flushes [possibleFlushes]
-                #    - Full House or Higher [haveFullHouseOrBetter] (Always infinite EV, #yolo)
-                # 12 - Whether we are big blind [self.is_big_blind]
+                # 0  -  High Card                       [highCard]
+                # 1  -  Pair Strength                   [singlePairStrength]
+                # 2  -  Higher Pairs                    [numberOfHigherFormableSinglePairs]
+                # 3  -  Outs                            [numberOfOuts]
+                # 4  -  2-Pair Strength                 [doublePairStrength]
+                # 5  -  Higher 2-Pairs                  [numberOfFormableDoublePairs]
+                # 6  -  Triple Strength                 [tripleStrength]
+                # 7  -  Higher Triple                   [numberOfHigherFormableTriples]
+                # 8  -  Straight Strength               [straightStrength]
+                # 9  -  Higher Straights                [possibleStraights]
+                # 10 -  Flush Strength                  [flushStrength]
+                # 11 -  Higher Flushes                  [possibleFlushes]
+                #    -  Full House or Higher            [haveFullHouseOrBetter] (Always infinite EV, #yolo)
+                # 12 -  Pocket Strength                 [pocketStrength]
+                # 13 -  Whether we are big blind        [self.is_big_blind]    -+ 
+                # 14 -  Hand Ev (Preflop Table)         [getEV]                -+- These 2 factors are always computed in linearCombination
+                self.our_player = our_player
                 self.weights = weights
-                self.is_big_blind = is_big_blind
-                # self.max_values = [13, 13, 5, 15, 13, 10, 13, 5, 13, 12, 13, 2]
-                self.max_values = [13, 13, 0, 15, 13, 0, 13, 0, 13, 0, 13, 0, 1]
+                self.max_values = [14, 14, 0, 17, 14, 0, 14, 0, 14, 0, 14, 0, 14, 1, 1]
                 maximum = 0
-                for i in range(0,12):
+                for i in range(0,15):
                         maximum += self.max_values[i]*self.weights[i]
                 self.maximum = maximum
+                self.is_big_blind = self.our_player.is_big_blind
+                self.hole_card_score = self.our_player.score
                 
 
         def getEV(self, hole_card, community_card):
-                factors = [0] * 12
+                factors = [0] * 13
 
                 cards = DecomposedCards(hole_card, community_card)
                 # If have FH or better, #yolo
@@ -44,6 +47,7 @@ class FASTHeuristic:
                 factors[3] = self.max_values[3]
                 factors[1] = self.max_values[1]
                 factors[0] = self.max_values[0]
+                factors[12] = cards.pocketStrength()
 
                 # Calculate flush [10, 11]
                 factors[10] = cards.flushStrength()
@@ -83,10 +87,13 @@ class FASTHeuristic:
         def __linearCombination(self, factors):
                 # print(factors)
 
-                # Also add if we are big blind
-                total = self.weights[12]*self.is_big_blind
-                
-                for i in range(0, 12):
+                # If we are big blind
+                total = self.weights[13]*self.is_big_blind
+
+                # getEv
+                total += self.weights[14]*self.hole_card_score
+
+                for i in range(0, 13):
                         total += self.weights[i] * factors[i]
                 return max(0, total/self.maximum)
 
@@ -176,6 +183,11 @@ class DecomposedCards:
                         return pair_strength
                 return 0
 
+        def pocketStrength(self):
+                if self.hole_card[0].rank == self.hole_card[1].rank:
+                        return self.hole_card[0].rank
+                return 0
+
         def numberOfHigherFormableSinglePairs(self):
                 mySinglePairStrength = self.singlePairStrength()
                 num_higher_formable_pairs = 0
@@ -225,7 +237,7 @@ class DecomposedCards:
                 # Calculate triple outs (Estimation)
                 for rank in self.num_rank:
                         if self.num_rank[rank] == 2 and not self.comm_card_num_rank[rank] == 2:
-                                outs += 1.75
+                                outs += 2
                 return outs
 
         def doublePairStrength(self):
@@ -363,11 +375,11 @@ class DecomposedCards:
 
         def haveFullHouseOrBetter(self):
                 return self.haveFullHouse() or self.haveStraightFlush() or self.haveFourOfAKind()
-                
-                                
-########## TEST ##########
 
-##hole_card_list = ['C4', 'D2']
+          
+########## TEST ##########
+##
+##hole_card_list = ['CK', 'DK']
 ##community_card_list = ['D4', 'C5', 'CQ', 'CA', 'HK']
 ##
 ##hole_card = gen_cards(hole_card_list)
@@ -389,12 +401,15 @@ class DecomposedCards:
 ##print("9 possibleStraights: " + str(cards.possibleStraights()))
 ##print("10 flushStrength: "+ str(cards.flushStrength()))
 ##print("11 possibleFlushes: "+ str(cards.possibleFlushes()))
+##print("12 pocketStrength: " + str(cards.pocketStrength()))
 ##print("haveStraightFlush: " + str(cards.haveStraightFlush()))
 ##print("haveFullHouse: " + str(cards.haveFullHouse()))
 ##print("INF haveFullHouseOrBetter: " + str(cards.haveFullHouseOrBetter()))
+##
 ##print()
-##fast = FASTHeuristic(True, [1,1,1,1,1,1,1,1,1,1,1,1,1])
-##print("12 isBigBlind: " + str(fast.is_big_blind))
+##fast = FASTHeuristic(11, 1, [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1])
+##print("13 isBigBlind: " + str(fast.is_big_blind))
 ##print()
 ##print("FAST: " + str(fast.getEV(hole_card, community_card)))
+
 
