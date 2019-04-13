@@ -3,7 +3,7 @@ from pypokerengine.engine.card import Card
 
 # Factors Actively Selectively Taken
 class FASTHeuristic:
-        def __init__(self, hole_card_score, is_big_blind, weights):
+        def __init__(self, our_player, weights):
                 # Array of weights
                 # 0  -  High Card                       [highCard]
                 # 1  -  Pair Strength                   [singlePairStrength]
@@ -21,14 +21,15 @@ class FASTHeuristic:
                 # 12 -  Pocket Strength                 [pocketStrength]
                 # 13 -  Whether we are big blind        [self.is_big_blind]    -+ 
                 # 14 -  Hand Ev (Preflop Table)         [getEV]                -+- These 2 factors are always computed in linearCombination
-                self.hole_card_score = hole_card_score
+                self.our_player = our_player
                 self.weights = weights
-                self.is_big_blind = is_big_blind
                 self.max_values = [14, 14, 0, 17, 14, 0, 14, 0, 14, 0, 14, 0, 14, 1, 1]
                 maximum = 0
                 for i in range(0,15):
                         maximum += self.max_values[i]*self.weights[i]
                 self.maximum = maximum
+                self.is_big_blind = self.our_player.is_big_blind
+                self.hole_card_score = self.our_player.score
                 
 
         def getEV(self, hole_card, community_card):
@@ -46,6 +47,7 @@ class FASTHeuristic:
                 factors[3] = self.max_values[3]
                 factors[1] = self.max_values[1]
                 factors[0] = self.max_values[0]
+                factors[12] = cards.pocketStrength()
 
                 # Calculate flush [10, 11]
                 factors[10] = cards.flushStrength()
@@ -75,7 +77,6 @@ class FASTHeuristic:
                 # Calculate pairs
                 factors[1] = cards.singlePairStrength()
                 factors[2] = -cards.numberOfHigherFormableSinglePairs()
-                factors[12] = cards.pocketStrength()
                 if factors[1] > 0:
                         return self.__linearCombination(factors)
 
@@ -184,7 +185,7 @@ class DecomposedCards:
 
         def pocketStrength(self):
                 if self.hole_card[0].rank == self.hole_card[1].rank:
-                        return hole_card[0].rank
+                        return self.hole_card[0].rank
                 return 0
 
         def numberOfHigherFormableSinglePairs(self):

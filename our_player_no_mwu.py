@@ -42,15 +42,15 @@ class OurPlayerNoMwu(BasePokerPlayer):
 
     def declare_action(self, valid_actions, hole_card, round_state):
         self.is_big_blind = self.__is_big_blind(round_state)
-        score = self.hand_scorer.score_hole_cards(hole_card)
+        self.score = self.hand_scorer.score_hole_cards(hole_card)
         if round_state["street"] == "preflop":
             #PREFLOP
             bb_score = 1
             # Fold Below
-            if score < self.preflop_weights[0] + self.preflop_weights[4] * bb_score:
+            if self.score < self.preflop_weights[0] + self.preflop_weights[4] * bb_score:
                 return "fold"
             # Raise Above
-            elif score < self.preflop_weights[1] + self.preflop_weights[5] * bb_score:
+            elif self.score < self.preflop_weights[1] + self.preflop_weights[5] * bb_score:
                 # Bluff Raise
                 if rand.random() < self.preflop_weights[2]:
                     if {"action": "raise"} in valid_actions:
@@ -70,7 +70,7 @@ class OurPlayerNoMwu(BasePokerPlayer):
         hole_cards = gen_cards(hole_card)
         community_cards = gen_cards(round_state["community_card"])
         pot = round_state["pot"]["main"]["amount"]
-        self.last_action = AdversarialSearch(score, self,
+        self.last_action = AdversarialSearch(self,
             hole_cards, community_cards,
             pot, self.heuristic_weights).decide([action.get("action") for action in valid_actions],
                         self.action_weights)
