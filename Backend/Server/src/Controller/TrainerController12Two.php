@@ -4,10 +4,10 @@ declare (strict_types = 1);
 namespace Controller;
 
 use Database\Database;
-use Model\Factor12\Result;
-use Model\Factor12\Weight;
+use Model\Factor12Two\Result;
+use Model\Factor12Two\Weight;
 
-class TrainerController
+class TrainerController12Two
 {
 
     public $minGames;
@@ -18,8 +18,8 @@ class TrainerController
     {
         Database::init();
 
-        $this->minGames = 50;
-        $this->intervals = 20;
+        $this->minGames = 250;
+        $this->intervals = 100;
         $this->numWeights = 12;
     }
 
@@ -37,6 +37,29 @@ class TrainerController
         print(json_encode($w));
     }
 
+    public function t()
+    {   
+        $weights = Weight::getWeights();
+        $currentIteration = $weights[$this->numWeights - 1]->iteration + 1;
+        $currentWeight = $weights[0]->weight + 1;
+        if ($currentWeight > $this->numWeights - 1) {
+            $currentWeight = 0;
+        }
+
+        $w = [];
+        for ($i = 0; $i < $this->numWeights; ++$i) {
+            foreach ($weights as $weight) {
+                if ($weight->weight == $i) {
+                    array_push($w, (float) $weight->val);
+                }
+            }
+        }
+
+        $bestResult = Result::getBestResult(8, 6);
+        print($bestResult->test_value);
+        var_dump($w[$currentWeight]);
+    }
+
     public function getTrainingSet()
     {
         $weights = Weight::getWeights();
@@ -51,7 +74,19 @@ class TrainerController
         $tests = Result::getIncompleteTests($currentIteration, $currentWeight);
         if (count($tests) == 0) {
             $bestResult = Result::getBestResult($currentIteration, $currentWeight);
-            Weight::newWeight($currentIteration, $currentWeight, $bestResult->test_value);
+            if ($bestResult->result > 300) {
+                Weight::newWeight($currentIteration, $currentWeight, $bestResult->test_value);
+            } else {
+                $w = [];
+                for ($i = 0; $i < $this->numWeights; ++$i) {
+                    foreach ($weights as $weight) {
+                        if ($weight->weight == $i) {
+                            array_push($w, (float) $weight->val);
+                        }
+                    }
+                }
+                Weight::newWeight($currentIteration, $currentWeight, $w[$currentWeight]);
+            }
 
             $weights = Weight::getWeights();
             $currentIteration = $weights[$this->numWeights - 1]->iteration + 1;
