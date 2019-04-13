@@ -8,8 +8,8 @@ from argparse import ArgumentParser
 from random_player import RandomPlayer
 from raise_player import RaisedPlayer
 from call_player import CallPlayer
-from our_player import OurPlayer
 from our_player_copy import OurPlayerCopy
+from our_player_alternative import OurPlayerAlternative
 from joblib import Parallel, delayed
 
 import pandas as pd
@@ -19,11 +19,11 @@ Assign the player you want to test as MY_PLAYER (Make sure you import the player
 
 Run `python measure_performance.py` in root directory
 """
-MY_PLAYER = OurPlayer
+MY_PLAYER = OurPlayerAlternative
 def testperf(agent_name1, agent1, agent_name2, agent2, count):
 
-    num_game = 1
-    max_round = 2
+    num_game = 10
+    max_round = 200
     initial_stack = 10000
     smallblind_amount = 20
 
@@ -85,7 +85,7 @@ if __name__ == '__main__':
     players = {
         "no_mwu": OurPlayerCopy()
     }
-    lrs = [0.1, 0.0001, 0.000001]
+    lrs = [0.5, 0.1]
     count = 0
     for lr in lrs:
         my_agent = MY_PLAYER(lr)
@@ -98,4 +98,3 @@ if __name__ == '__main__':
             end = time.time()
             print("\n Time taken to play: %.4f seconds" % (end - start))
         count += 1
-
