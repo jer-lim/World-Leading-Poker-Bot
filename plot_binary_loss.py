@@ -5,7 +5,7 @@ for i in range(3):
     if 'Unnamed: 0' in data.columns:
         data.drop('Unnamed: 0', inplace=True, axis=1)
     data.rename({"ME": "mwu"+str(i), "no_mwu"+str(i): "no mwu"}, axis=1, inplace=True)
-    data = data/100
+    data = data/1000
     ax = data.plot(style=["r-", "b-"])
     ax.set_xlabel("Rounds")
     ax.set_ylabel("Average Pot")
