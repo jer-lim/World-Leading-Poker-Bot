@@ -12,6 +12,8 @@ from httplib import HTTPSConnection
 import json
 import copy
 import socket
+import time
+import random
 
 """ =========== *Remember to import your agent!!! =========== """
 from random_player import RandomPlayer
@@ -29,7 +31,9 @@ smallblind_amount = 20
 
 
 def main():
-	
+	sleep_time = float(random.randrange(0, 100, 1)) / 10
+	print("Waiting for " + str(sleep_time))
+	time.sleep(sleep_time)
 	while True:
 		try:
 			current_iteration = -1
@@ -37,6 +41,18 @@ def main():
 			test = get_test()
 			test_count = 0
 			while True:
+				benchmark = get_benchmark()
+				if benchmark is not None:
+					sys.stdout.write("Benchmarking iteration " + str(benchmark['iteration1']) + " with " + str(benchmark['iteration2']) + ": ")
+					weights1 = benchmark['weights1']
+					weights2 = benchmark['weights2']
+					benchmark_min_game = benchmark['min_games']
+					performance = do_benchmark(weights1, weights2, benchmark_min_game)
+					print(performance)
+					benchmark['result'] = performance
+					post_benchmark(benchmark)
+					test = get_test()
+
 				if test['iteration'] > current_iteration or test['weight'] > current_weight:
 					weights = get_weights()
 					current_iteration = test['iteration']
@@ -50,6 +66,7 @@ def main():
 				if test_count % 100 == 0:
 					print(str(test_count) + " bitcoins mined so far.")
 				test = post_result(test)
+
 		except (KeyboardInterrupt, SystemExit):
 			raise
 		except:
@@ -91,6 +108,19 @@ def get_status():
 	status = json.loads(response.read(9999))
 	conn.close()
 	return status
+
+def get_benchmark():
+	conn = HTTPSConnection(host)
+	conn.request("GET", "/13/benchmark/" + socket.gethostname());
+	response = conn.getresponse()
+	benchmark = json.loads(response.read(9999))
+	conn.close()
+	return benchmark
+
+def post_benchmark(benchmark):
+	conn = HTTPSConnection(host)
+	conn.request("POST", "/13/benchmark", json.dumps(benchmark))
+	conn.close()
 
 def print_test(test):
 	sys.stdout.write("Test iteration " + str(test['iteration']) + " w" + str(test['weight']) + " value " + str(test['testValue']) + " (" + str(test['minGames']) + " games): ")
@@ -142,6 +172,46 @@ def do_test(weights, test, min_game, current_iteration, current_weight):
 		if status['iteration'] != current_iteration or status['weight'] != current_weight:
 			print("Current iteration/weight changed. Stopping current training.")
 			games = 0;
+
+	performance = (agent1_pot - agent2_pot) / num_games_ran
+	return performance
+
+def do_benchmark(weights1, weights2, min_game):
+	config = setup_config(max_round=max_round, initial_stack=initial_stack, small_blind_amount=smallblind_amount)
+	# Register players
+	config.register_player(name="agent1", algorithm=OurPlayerNoMwu(weights1))
+	config.register_player(name="agent2", algorithm=OurPlayerNoMwu(weights2))
+
+	# Start playing num_game games
+	agent1_pot = 0
+	agent2_pot = 0
+
+	# init count of games and threads
+	return_queue = Queue()
+	num_threads = multiprocessing.cpu_count() - 1
+	games = min_game + num_threads - (min_game % num_threads)
+	num_games_ran = 0
+	while games > 0:
+		# start a thread for each remaining game up to threadcount limit
+		threads = []
+		game_runners = []
+		for i in range(0, num_threads):
+			if games > 0:
+				games -= 1
+				num_games_ran += 1
+				game_runners += [GameRunner(config, return_queue)]
+				threads += [Process(target = game_runners[i].start_game)]
+				threads[i].start()
+
+		# join all threads
+		for i in range(0, len(threads)):
+			threads[i].join()
+
+		# process returned data
+		while not return_queue.empty():
+			result = return_queue.get()
+			agent1_pot = agent1_pot + result[0]
+			agent2_pot = agent2_pot + result[1]
 
 	performance = (agent1_pot - agent2_pot) / num_games_ran
 	return performance
