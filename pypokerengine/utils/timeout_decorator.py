@@ -99,11 +99,12 @@ def timeout2(seconds=None, defaultretval="Blah",exception_message="[EXP]: Action
         Uses Signals. Can you use multiprocessing instead.
     """
     def decorate(function):
+        return function
 
         if not seconds:
             return function
 
-        
+
         def handler(signum, frame):
             _raise_exception(timeout_exception, exception_message)
             #print("[EXP] : TimedOut, Returning Default Value (Fold)")

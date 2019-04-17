@@ -4,7 +4,9 @@ import game
 setup_config = game.setup_config
 start_poker = game.start_poker
 import time
+from me import MePlayer
 from argparse import ArgumentParser
+from our_player import OurPlayer
 from random_player import RandomPlayer
 from raise_player import RaisedPlayer
 from call_player import CallPlayer
@@ -19,7 +21,7 @@ Assign the player you want to test as MY_PLAYER (Make sure you import the player
 
 Run `python measure_performance.py` in root directory
 """
-MY_PLAYER = OurPlayerAlternative()
+MY_PLAYER = OurPlayer()
 
 def testperf(agent_name1, agent1, agent_name2, agent2):
     num_game = 100
@@ -83,11 +85,11 @@ def testperf(agent_name1, agent1, agent_name2, agent2):
 
 if __name__ == '__main__':
     my_name = "ME"
-    my_agent = MY_PLAYER
-    MY_PLAYER.name = my_name
+    my_agent = OurPlayer()
+    my_agent.name = my_name
 
     players = {
-        "no_mwu": OurPlayerCopy()
+        "no_mwu":MePlayer()
     }
     for name, base_agent in players.items():
         base_agent.name = name
