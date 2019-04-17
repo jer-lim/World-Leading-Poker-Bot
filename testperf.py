@@ -16,6 +16,7 @@ from random_player import RandomPlayer
 from raise_player import RaisedPlayer
 from scaramucci import BootStrapBot
 from our_player_no_mwu import OurPlayerNoMwu
+from Group01Player import Group01Player
 from hand_strength import HandStrengthBot
 # from smartwarrior import SmartWarrior
 """ ========================================================= """
@@ -43,7 +44,7 @@ def testperf(agent_name1, agent1, agent_name2, agent2):
 	# Register players
 	config.register_player(name=agent_name1, algorithm=OurPlayerNoMwu([0.8425,2.3519,0.19,1.6801,0.7491,0.3869,0.855,0.7166,-0.24,0.085,-0.21,0.035,0.52,0.16,0.18]))
 	#config.register_player(name=agent_name2, algorithm=OurPlayerNoMwu([0.63,0.83,0.4,1,0.75,0.49,0.38,0.87,0.21,0,0,0.14,0.44]))
-	config.register_player(name=agent_name2, algorithm=HandStrengthBot())
+	config.register_player(name=agent_name2, algorithm=Group01Player([0.8425,2.3519,0.19,1.6801,0.7491,0.3869,0.855,0.7166,-0.24,0.085,-0.21,0.035,0.52,0.16,0.18]))
 	# config.register_player(name=agent_name1, algorithm=agent1())
 	# config.register_player(name=agent_name2, algorithm=agent2())
 	
