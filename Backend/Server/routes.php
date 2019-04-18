@@ -44,17 +44,23 @@ Route::get("/13/test", "\Controller\TrainerController13", "getTrainingSet");
 Route::cli("/13/test", "\Controller\TrainerController13", "getTrainingSet");
 Route::post("/13/submit", "\Controller\TrainerController13", "submitTestResult");
 Route::get("/13/status", "\Controller\TrainerController13", "getStatus");
+Route::get("/13/benchmark/{tester}", "\Controller\TrainerController13", "getBenchmark");
+Route::post("/13/benchmark", "\Controller\TrainerController13", "submitBenchmark");
 
 Route::get("/preflop/6/weights", "\Controller\TrainerControllerPreflop6", "getWeights");
 Route::get("/preflop/6/test", "\Controller\TrainerControllerPreflop6", "getTrainingSet");
 Route::cli("/preflop/6/test", "\Controller\TrainerControllerPreflop6", "getTrainingSet");
 Route::post("/preflop/6/submit", "\Controller\TrainerControllerPreflop6", "submitTestResult");
 Route::get("/preflop/6/status", "\Controller\TrainerControllerPreflop6", "getStatus");
+Route::get("/preflop/6/benchmark/{tester}", "\Controller\TrainerControllerPreflop6", "getBenchmark");
+Route::post("/preflop/6/benchmark", "\Controller\TrainerControllerPreflop6", "submitBenchmark");
 
 Route::get("/15/weights", "\Controller\TrainerController15", "getWeights");
 Route::get("/15/test", "\Controller\TrainerController15", "getTrainingSet");
 Route::cli("/15/test", "\Controller\TrainerController15", "getTrainingSet");
 Route::post("/15/submit", "\Controller\TrainerController15", "submitTestResult");
 Route::get("/15/status", "\Controller\TrainerController15", "getStatus");
+Route::get("/15/benchmark/{tester}", "\Controller\TrainerController15", "getBenchmark");
+Route::post("/15/benchmark", "\Controller\TrainerController15", "submitBenchmark");
 
-Route::cli("/t", "\Controller\TrainerController13", "t");
+Route::cli("/t", "\Controller\TrainerControllerPreflop6", "t");

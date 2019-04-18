@@ -29,6 +29,14 @@ class Weight extends \Illuminate\Database\Eloquent\Model
             ->get();
     }
 
+    public static function getIterationWeights($iteration)
+    {
+        return self::where("iteration", $iteration)
+            ->orderBy("weight", "ASC")
+            ->pluck("val")
+            ->toArray();
+    }
+
     public static function getWeight($iteration, $weight)
     {
         return self::where("iteration", $iteration)

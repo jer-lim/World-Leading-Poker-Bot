@@ -4,6 +4,7 @@ declare (strict_types = 1);
 namespace Controller;
 
 use Database\Database;
+use Model\FactorPreflop6\Benchmark;
 use Model\FactorPreflop6\Result;
 use Model\FactorPreflop6\Weight;
 
@@ -18,7 +19,7 @@ class TrainerControllerPreflop6
     {
         Database::init();
 
-        $this->minGames = 250;
+        $this->minGames = 400;
         $this->intervals = 105;
         $this->numWeights = 6;
     }
@@ -39,14 +40,9 @@ class TrainerControllerPreflop6
 
     public function t()
     {
-        $weights = Weight::getWeights();
-        $currentIteration = $weights[$this->numWeights - 1]->iteration + 1;
-        $currentWeight = $weights[0]->weight + 1;
-        if ($currentWeight > $this->numWeights - 1) {
-            $currentWeight = 0;
+        for ($i = 1; $i <= 10; ++$i) {
+            $this->populateBenchmark($i);
         }
-
-        $weight = Weight::getWeight($currentIteration - 1, $currentWeight);
     }
 
     public function getTrainingSet()
@@ -125,6 +121,49 @@ class TrainerControllerPreflop6
         $obj->iteration = $currentIteration;
         $obj->weight = $currentWeight;
         print(json_encode($obj));
+    }
+
+    public function getBenchmark($params)
+    {
+        $tester = $params["tester"];
+
+        $benchmark = Benchmark::getUnassignedBenchmark();
+        if ($benchmark == null) {
+            print(json_encode(null));
+        } else {
+            $benchmark->setTester($tester);
+
+            $toDouble = function ($str) {
+                return (double) $str;
+            };
+
+            $weights1 = Weight::getIterationWeights($benchmark->iteration1);
+            $weights1 = array_map($toDouble, $weights1);
+            $weights2 = Weight::getIterationWeights($benchmark->iteration2);
+            $weights2 = array_map($toDouble, $weights2);
+
+            $obj = new \stdClass();
+            $obj->iteration1 = $benchmark->iteration1;
+            $obj->iteration2 = $benchmark->iteration2;
+            $obj->weights1 = $weights1;
+            $obj->weights2 = $weights2;
+            $obj->min_games = $benchmark->min_games;
+            print(json_encode($obj));
+        }
+    }
+
+    public function submitBenchmark()
+    {
+        $test = json_decode(file_get_contents('php://input'));
+        $benchmark = Benchmark::getBenchmark($test->iteration1, $test->iteration2);
+        $benchmark->setResult($test->result);
+    }
+
+    private function populateBenchmark($iteration)
+    {
+        if (!Benchmark::haveBenchmarks($iteration)) {
+            Benchmark::createBenchmarks($iteration);
+        }
     }
 
     private function checkResultsExist($currentIteration, $currentWeight)
