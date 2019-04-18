@@ -32,7 +32,7 @@ def MWU(action_weights, factor_to_punish, punish_constant,
 
 
 class Group01Player(BasePokerPlayer):
-    def __init__(self, weights = [0.8425,2.3519,0.19,1.6801,0.7491,0.3869,0.855,0.7166,-0.24,0.085,-0.21,0.035,0.52,0.16,0.18], preflop_weights = [-0.23, 0, 0, 0, 0, 0], alpha = 0.01):
+    def __init__(self, weights = [0.8425,2.3519,0.19,1.6801,0.7491,0.3869,0.855,0.7166,-0.24,0.085,-0.21,0.035,0.52,0.16,0.18], preflop_weights = [-0.23, 0, 0, 0, 0, 0], alpha = 0.1):
     	# Heuristic / Preflop
         self.hand_scorer = HandScorer()
         self.heuristic_weights = weights  # For heuristic function
@@ -121,19 +121,23 @@ class Group01Player(BasePokerPlayer):
         new_stack = list(
             filter(lambda x: x["uuid"] == self.uuid,
                    round_state["seats"]))[0]["stack"]
+        if self.stack_start_round - new_stack > 0:
+            val = 1
+        else:
+            val = 0
         to_penalize = self.last_action
         if to_penalize == "fold":
             self.action_weights = MWU(self.action_weights, self.last_action, self.alpha,
-                                      self.stack_start_round - new_stack)
+                                      val)
         else:
             if self.action_counts[0] > self.action_counts[1]:
                 self.action_weights = MWU(self.action_weights, "call", self.alpha,
-                                          self.stack_start_round - new_stack)
+                                          val)
                 self.action_weights = MWU(self.action_weights, "raise", self.alpha,
-                                        self.stack_start_round - new_stack)
+                                        val)
             else:
                 self.action_weights = MWU(self.action_weights, "raise", self.alpha,
-                                          self.stack_start_round - new_stack)
+                                          val)
 
     # Sets the new weights of the Player's actions
     def set_heuristic_weights(self, index, value):
