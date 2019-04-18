@@ -32,7 +32,8 @@ def MWU(action_weights, factor_to_punish, punish_constant,
 
 
 class OurPlayerNoMwu(BasePokerPlayer):
-    def __init__(self, weights = [0.8425,2.3519,0.19,1.6801,0.7491,0.3869,0.855,0.7166,-0.24,0.085,-0.21,0.035,0.52,0.16,0.18], preflop_weights = [-0.23, 0, 0, 0, 0, 0]):
+    def __init__(self, weights = [1.6526,8.7122,0.2755,3.6656,0.6929,4.8389,1.0223,-0.385,-0.43,-0.59,-0.575,-0.39,0.8951,0.1865,0.5052
+], preflop_weights = [-0.23, 0, 0, 0, 0, 0]):
         self.hand_scorer = HandScorer()
         self.action_weights = [1, 1, 1]
         self.heuristic_weights = weights  # For heuristic function
