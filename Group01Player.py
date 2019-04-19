@@ -1,6 +1,6 @@
 from pypokerengine.players import BasePokerPlayer
 import random as rand
-from adversarial_search import AdversarialSearch
+from Group01_adversarial_search import AdversarialSearch
 import collections
 import math
 
@@ -32,7 +32,7 @@ def MWU(action_weights, factor_to_punish, punish_constant,
 
 
 class Group01Player(BasePokerPlayer):
-    def __init__(self, weights = [0.8425,2.3519,0.19,1.6801,0.7491,0.3869,0.855,0.7166,-0.24,0.085,-0.21,0.035,0.52,0.16,0.18], preflop_weights = [-0.23, 0, 0, 0, 0, 0], alpha = 0.1):
+    def __init__(self, weights = [0.8425,2.3519,0.19,1.6801,0.7491,0.3869,0.855,0.7166,-0.24,0.085,-0.21,0.035,0.52,0.16,0.18], preflop_weights = [-0.18, 0.18, -0.26, -0.13, -0.12, -0.14], alpha = 0.1):
     	# Heuristic / Preflop
         self.hand_scorer = HandScorer()
         self.heuristic_weights = weights  # For heuristic function
